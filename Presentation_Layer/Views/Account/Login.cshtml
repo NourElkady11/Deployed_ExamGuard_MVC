@@ -1,0 +1,40 @@
+﻿@model LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/AuthLayout.cshtml";
+}
+
+<div class="main-agileinfo">
+	<div class="agileits-top">
+		<form action="Login" method="post">
+@* 			<div asp-validation-summary="All"></div> *@
+
+	
+			<input asp-for="Email" placeholder="Email" required="">
+			<span class="text-danger" asp-validation-for="Email"></span>
+			
+			<br />
+			<input asp-for="Password" placeholder="Password" required="">
+			<span class="text-danger" asp-validation-for="Password"></span>
+			<br />
+			<div class="wthree-text">
+				<label class="anim">
+					<input asp-for="RememberMe" class="checkbox" required="">
+					<span>Keep me signed in</span>
+				</label>
+				<div class="clear"> </div>
+			</div>
+			<input type="submit" value="Login">
+		@* 	<p><a asp-action="GoogleLogin">Login with your Google Account</a></p> *@
+		</form>
+		<br/>
+		<p> Dont have an Account? <a asp-action="Register">Register Now </a></p>
+		<br/>
+		<p><a asp-action="ForgetPassword">ForgetPassword !</a></p>
+	</div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+}
