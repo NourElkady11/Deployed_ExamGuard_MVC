@@ -5,8 +5,8 @@ using Microsoft.Identity.Client;
 
 namespace DataAccess_Layer.Repositories
 {
-    public interface IDepartmentRepositorys : IGenaricRepository<Department>
+    public interface ICourseRepositorys : IGenaricRepository<Course>
     {
-        //PUT ANY ADDED SIGNUTURES TO YOUR CLASS FROM HERE 
+    
     }
 }

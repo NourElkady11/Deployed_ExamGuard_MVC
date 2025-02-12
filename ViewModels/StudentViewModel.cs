@@ -4,17 +4,15 @@ using Microsoft.AspNetCore.Http;
 
 namespace Presentation_Layer.ViewModels
 {
-    public class EmployeeViewModel
+    public class StudentViewModel
     {
         public int Id { get; set; }
         [StringLength(maximumLength: 50, MinimumLength = 5)]
         public string Name { get; set; }
-        [Range(15, 70)]
-        public int Age { get; set; }
+
         [EmailAddress]
         public string Email { get; set; }
-        [DataType(DataType.Currency)]
-        public decimal Salary { get; set; }
+ 
         [Phone]
         public string phone { get; set; }
 
@@ -26,8 +24,8 @@ namespace Presentation_Layer.ViewModels
 
         public string? ImageName { get; set; }
 
-        public Department? Department { get; set; }
+        public ICollection<CourseStudent>? CourseStudents { get; set; } = new List<CourseStudent>();
 
-        public int DepartmentId { get; set; }
+
     }
 }

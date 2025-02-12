@@ -1,4 +1,5 @@
-﻿using DataAccess_Layer.Data;
+﻿using Data.Data;
+using DataAccess_Layer.Data;
 using DataAccess_Layer.Models;
 using DataAccess_Layer.Repositories;
 using Microsoft.AspNetCore.Authentication;
@@ -26,6 +27,10 @@ namespace Presentation_Layer
             builder.Services.AddDbContext<DataIdentityContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+            });
+            builder.Services.AddDbContext<DataContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("BusinessConnection"));
             });
             builder.Services.AddAutoMapper(typeof(Program).Assembly);
             builder.Services.AddAutoMapper(typeof(Reference).Assembly);

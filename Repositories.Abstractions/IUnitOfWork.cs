@@ -8,9 +8,8 @@ namespace DataAccess_Layer.Repositories
 {
     public interface IUnitOfWork
     {
-        public IEmployeeRepoistory Employees { get; }
-        public IDepartmentRepositorys Departments { get; }
-
+        public IStudentRepoistory StudentsRepo { get; }
+        public ICourseRepositorys CoursesRepo { get; }
         public Task <int> SaveChangesAsync();
     }
 }

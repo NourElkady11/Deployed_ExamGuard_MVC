@@ -6,11 +6,11 @@ using Presentation_Layer.ViewModels;
 
 namespace Presentation_Layer.Profiles
 {
-    public class Employee_Profile:Profile
+    public class Student_Profile:Profile
     {
-        public Employee_Profile() {
+        public Student_Profile() {
 
-            CreateMap<Employee, EmployeeViewModel>().ReverseMap();
+            CreateMap<Student, StudentViewModel>().ReverseMap();
         }
     }
 }

@@ -1,5 +1,9 @@
-﻿using DataAccess_Layer.Data;
+﻿using AutoMapper;
+using Data.Data;
+using Data.Models;
+using DataAccess_Layer.Data;
 using DataAccess_Layer.Models;
+using DataAccess_Layer.Repositories;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -11,9 +15,9 @@ using System.Security.Claims;
 
 namespace Presentation_Layer.Controllers
 {
-    public class AccountController : Controller
+    public class AccountController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, DataIdentityContext dataIdentityContext, SignInManager<ApplicationUser> signInManager, IMapper mapper , DataContext dataContext) : Controller
     {
-        private readonly UserManager<ApplicationUser> userManager;
+     /*   private readonly UserManager<ApplicationUser> userManager;
         private readonly SignInManager<ApplicationUser> signInManager;
 
         private readonly DataIdentityContext dataContext;
@@ -23,7 +27,7 @@ namespace Presentation_Layer.Controllers
             this.userManager = userManager;
             this.dataContext = dataContext;
             this.signInManager = signInManager;
-        }
+        }*/
 
         public IActionResult Register()
         {
@@ -31,7 +35,7 @@ namespace Presentation_Layer.Controllers
         }
 
         [HttpPost]
-        public IActionResult Register(RegisterViewModel registerViewModel)
+        public async Task<IActionResult> Register(RegisterViewModel registerViewModel)
         {
             if (!ModelState.IsValid)
             {
@@ -39,23 +43,38 @@ namespace Presentation_Layer.Controllers
             }
             else
             {
-                var FindUser = userManager.FindByEmailAsync(registerViewModel.Email).Result;
+                var FindUser = await userManager.FindByEmailAsync(registerViewModel.Email);
                 if (FindUser is null)
                 {
                     var user = new ApplicationUser
                     {
                         Firstname = registerViewModel.FirstName,
-                        Lastname = registerViewModel.LastName,
+                        Lastname=registerViewModel.LastName,
                         UserName = registerViewModel.Username,
                         Email = registerViewModel.Email
                     };
 
-                    var result = userManager.CreateAsync(user, registerViewModel.Password).Result;
-                   
-                    if (result.Succeeded)
+                    var result =await userManager.CreateAsync(user, registerViewModel.Password);
+                    var studentViewModel = new StudentViewModel()
                     {
-                    
-                        var roleResult = userManager.AddToRoleAsync(user,"Student").Result;
+                        Name = registerViewModel.Username,
+                        Email=registerViewModel.Email,
+                        phone=registerViewModel.Phone,
+                        address=registerViewModel.address,
+                        
+                    };
+					if (registerViewModel.Image is not null)
+					{
+						studentViewModel.ImageName = await DocumentSetting.uploadFile(registerViewModel.Image, "Images");
+					}
+                    var student=mapper.Map<Student>(studentViewModel);
+                     await unitOfWork.StudentsRepo.CreateAsync(student);
+                     await unitOfWork.SaveChangesAsync();
+
+
+					if (result.Succeeded)
+                    {
+                        var roleResult = await userManager.AddToRoleAsync(user,"Student");
 
                         if (roleResult.Succeeded)
                         {

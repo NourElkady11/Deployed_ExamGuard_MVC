@@ -6,16 +6,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Data.Data;
 
 namespace DataAccess_Layer.Repositories
 {
     public class GenricRepository<Tentity> : IGenaricRepository<Tentity> where Tentity : class
     {
-        protected DataIdentityContext context;
+        protected DataContext context;
         protected DbSet<Tentity> dbset;
 
 
-        public GenricRepository(DataIdentityContext context)
+        public GenricRepository(DataContext context)
         {
             this.context = context;
             dbset = context.Set<Tentity>();

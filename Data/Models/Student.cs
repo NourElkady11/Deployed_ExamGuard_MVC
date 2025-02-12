@@ -6,15 +6,12 @@ using System.Threading.Tasks;
 
 namespace Data.Models
 {
-    public class Employee
+    public class Student
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public int Age { get; set; }
-
+ 
         public string Email { get; set; }
-
-        public decimal Salary { get; set; }
 
         public string phone { get; set; }
 
@@ -24,8 +21,7 @@ namespace Data.Models
 
         public string? ImageName { get; set; }
 
-        public Department? Department { get; set; }
+        public ICollection<CourseStudent>? CourseStudents { get; set; } = new List<CourseStudent>();
 
-        public int DepartmentId { get; set; }
     }
 }

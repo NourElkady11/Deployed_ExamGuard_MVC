@@ -1,10 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
 
 namespace Presentation_Layer.ViewModels
 {
+	//StudentViewModel
 	public class RegisterViewModel
 	{
-		[Required(ErrorMessage ="First name is required")]
+		[Required(ErrorMessage = "First name is required")]
 		public string FirstName { get; set; }
 
 		[Required(ErrorMessage = "Last name is required")]
@@ -24,7 +26,17 @@ namespace Presentation_Layer.ViewModels
         [Compare(nameof(Password),ErrorMessage ="Password Dosent match the Confirm Password")]
 		public string ConfirmPasword { get; set; }
 
-		public bool Isagree { get; set; }
-	}
+		[Required(ErrorMessage = "phone is required")]
+		public string Phone { get; set; }
+
+		[Required(ErrorMessage = "address is required")]
+		public string? address { get; set; }
+
+        public bool Isagree { get; set; }
+
+        public IFormFile? Image { get; set; }
+
+        public string? ImageName { get; set; }
+    }
 }
 

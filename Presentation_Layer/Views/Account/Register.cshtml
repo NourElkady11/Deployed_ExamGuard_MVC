@@ -8,26 +8,39 @@
 	<div class="agileits-top">
 		<form action="Register" method="post">
 		<div asp-validation-summary="ModelOnly"></div>
-
- 
 			<input asp-for="FirstName" placeholder="FirstName" required="">
 			<span class="text-danger" asp-validation-for="FirstName"></span>
 			<br />
 			<input asp-for="LastName" placeholder="LastName" required="">
 			<span class="text-danger" asp-validation-for="LastName"></span>
 			<br />
-			<input  asp-for="Username" placeholder="Username" required="">
+
+			<input  asp-for="Username"  placeholder="Username" required="">
 			<span class="text-danger" asp-validation-for="Username"></span>
 			<br />
-			<input asp-for="Email" placeholder="Email" required="">
+			<input asp-for="Email"  placeholder="Email" required="">
 			<span class="text-danger" asp-validation-for="Email"></span>
 			<br />
+		
+			<input asp-for="Phone" placeholder="Phone" required="">
+			<span class="text-danger" asp-validation-for="Phone"></span>
+			<br />
+
+			<input asp-for="address" placeholder="Address" required="" />
+			<span class="text-danger" asp-validation-for="address"></span>
+			<br />
+			
 			<input asp-for="Password" placeholder="Password" required="">
 			<span class="text-danger" asp-validation-for="Password"></span>
 			<br />
 			<input asp-for="ConfirmPasword" placeholder="ConfirmPasword" required="">
 			<span class="text-danger" asp-validation-for="ConfirmPasword"></span>
 			<br />
+
+			<input asp-for="Image" class="form-control" />
+			<span class="text-danger" asp-validation-for="Image"></span>
+			<br />
+
 			<div class="wthree-text">
 				<label class="anim">
 					<input asp-for="Isagree" class="checkbox" required="">

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Data.Models
 {
-    public class Department
+    public class Course
     {
         public int Id { get; set; }
         [Range(0, 500, ErrorMessage = "you are out of the range")]
@@ -15,8 +15,8 @@ namespace Data.Models
         [Required(ErrorMessage = "Name is required")]
         public string? Name { get; set; }
         [Display(Name = "Created at")]
-        public DateTime DateTime { get; set; }
+        public DateTime DateTime { get; set; }= DateTime.Now;
 
-        public ICollection<Employee> employees { get; set; } = new List<Employee>();
+        public ICollection<CourseStudent>? CourseStudents { get; set; } = new List<CourseStudent>();
     }
 }
