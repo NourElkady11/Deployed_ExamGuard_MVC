@@ -2,6 +2,9 @@
 @{
     ViewData["Title"] = "Exams";
 }
+<head>
+    <link rel="stylesheet" href="~/css/GetStudentExamss.css" asp-append-version="true" />
+</head>
 
 <div class="home-container">
     <!-- Header -->
@@ -54,58 +57,4 @@
     }
 </script>
 
-<style>
-    .home-container {
-        padding: 20px;
-    }
 
-    .header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: #2575fc;
-        color: white;
-        padding: 10px 20px;
-    }
-
-    .dashboard {
-        margin-top: 20px;
-    }
-
-    .exam-list {
-        display: grid;
-        gap: 20px;
-    }
-
-    .exam-item {
-        background: #f9f9f9;
-        padding: 15px;
-        border-radius: 5px;
-        border: 1px solid #ddd;
-    }
-
-    .btn {
-        padding: 10px 15px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    .btn-primary {
-        background-color: #2575fc;
-        color: white;
-    }
-
-        .btn-primary:hover {
-            background-color: #1b63e0;
-        }
-
-    .btn-secondary {
-        background-color: #ccc;
-        color: #666;
-    }
-
-        .btn-secondary[disabled] {
-            cursor: not-allowed;
-        }
-</style>

@@ -1,7 +1,48 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    @*  <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p> *@
-</div> 
+<head>
+    <link rel="stylesheet" href="~/css/Welcome.css" asp-append-version="true" />
+</head>
+<div class="container mt-5">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <h1 class="fw-bold text-primary">Welcome to ExamGuard</h1>
+            <p class="lead">The most advanced AI-powered online exam system with secure monitoring to ensure a fair Exam environment</p>
+            <a href="/Student/Index" class="btn btn-primary btn-lg mt-3">Explore My Courses</a>
+        </div>
+
+        <div class="col-md-6 text-center">
+            <img src="~/Files/Images/Stop_Cheating.png" class="img-fluid rounded shadow-lg" alt="Cheating Detection">
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="mt-5">
+        <h2 class="fw-bold text-center">How We Prevent Cheating?</h2>
+        <div class="row text-center mt-4">
+            <div class="col-md-4">
+                <i class="fas fa-eye text-primary fa-3x"></i>
+                <h4 class="mt-3">AI-Based Webcam Monitoring</h4>
+                <p>We use **face tracking & movement detection** to ensure students remain focused on their screens.</p>
+            </div>
+            <div class="col-md-4">
+                <i class="fas fa-laptop-code text-primary fa-3x"></i>
+                <h4 class="mt-3">Screen Activity Tracking</h4>
+                <p>System **detects tab-switching**, copy-pasting, and other suspicious activities during the exam.</p>
+            </div>
+            <div class="col-md-4">
+                <i class="fas fa-user-shield text-primary fa-3x"></i>
+                <h4 class="mt-3">Live Proctoring</h4>
+                <p>Exam supervisors can monitor students in real-time using **live video & activity logs**.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="text-center mt-5">
+        <h3>Ready to take a secure online exam?</h3>
+        <a href="/Exams/Index" class="btn btn-success btn-lg mt-3">Start My Exam</a>
+    </div>
+</div>
+

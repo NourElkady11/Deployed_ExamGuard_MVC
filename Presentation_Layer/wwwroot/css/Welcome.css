@@ -1,0 +1,25 @@
+﻿h1, h2, h3, h4 {
+    font-family: 'Poppins', sans-serif;
+}
+
+.lead {
+    font-size: 18px;
+    color: #555;
+}
+
+.img-fluid {
+    border-radius: 15px;
+    transition: transform 0.3s ease-in-out;
+}
+
+    .img-fluid:hover {
+        transform: scale(1.05);
+    }
+
+.fas {
+    transition: transform 0.3s ease-in-out;
+}
+
+    .fas:hover {
+        transform: scale(1.2);
+    }
