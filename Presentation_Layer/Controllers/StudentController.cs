@@ -25,6 +25,11 @@ namespace Presentation_Layer.Controllers
             return View();
         }
 
+        public async Task<IActionResult> EditProfile()
+        {
+            return View();
+        }
+
 
 
 
