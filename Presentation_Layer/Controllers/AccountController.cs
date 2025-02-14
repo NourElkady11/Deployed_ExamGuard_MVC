@@ -15,19 +15,8 @@ using System.Security.Claims;
 
 namespace Presentation_Layer.Controllers
 {
-    public class AccountController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, DataIdentityContext dataIdentityContext, SignInManager<ApplicationUser> signInManager, IMapper mapper , DataContext dataContext) : Controller
+    public class AccountController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager,SignInManager<ApplicationUser> signInManager, IMapper mapper) : Controller
     {
-     /*   private readonly UserManager<ApplicationUser> userManager;
-        private readonly SignInManager<ApplicationUser> signInManager;
-
-        private readonly DataIdentityContext dataContext;
-
-        public AccountController(UserManager<ApplicationUser> userManager, DataIdentityContext dataContext, SignInManager<ApplicationUser> signInManager)
-        {
-            this.userManager = userManager;
-            this.dataContext = dataContext;
-            this.signInManager = signInManager;
-        }*/
 
         public IActionResult Register()
         {
@@ -46,6 +35,7 @@ namespace Presentation_Layer.Controllers
                 var FindUser = await userManager.FindByEmailAsync(registerViewModel.Email);
                 if (FindUser is null)
                 {
+
                     var user = new ApplicationUser
                     {
                         Firstname = registerViewModel.FirstName,
@@ -54,6 +44,9 @@ namespace Presentation_Layer.Controllers
                         Email = registerViewModel.Email
                     };
 
+
+                    HttpContext.Session.SetString("UserEmail", registerViewModel.Email);
+
                     var result =await userManager.CreateAsync(user, registerViewModel.Password);
                     var studentViewModel = new StudentViewModel()
                     {
@@ -61,15 +54,21 @@ namespace Presentation_Layer.Controllers
                         Email=registerViewModel.Email,
                         phone=registerViewModel.Phone,
                         address=registerViewModel.address,
-                        
                     };
-					if (registerViewModel.Image is not null)
+
+					if(registerViewModel.Image is not null)
 					{
-						studentViewModel.ImageName = await DocumentSetting.uploadFile(registerViewModel.Image, "Images");
-					}
-                    var student=mapper.Map<Student>(studentViewModel);
+                        string imagePath = await DocumentSetting.uploadFile(registerViewModel.Image, "Images");
+                        studentViewModel.ImageName = imagePath;
+
+                        // ✅ Store in session
+                        HttpContext.Session.SetString("UserImage", imagePath);
+                    }
+
+                     var student=mapper.Map<Student>(studentViewModel);
                      await unitOfWork.StudentsRepo.CreateAsync(student);
                      await unitOfWork.SaveChangesAsync();
+                      
 
 
 					if (result.Succeeded)
@@ -121,7 +120,7 @@ namespace Presentation_Layer.Controllers
             }
             else
             {
-                TempData["UserEmail"] = loginViewModel.Email;
+             
                 var user = userManager.FindByEmailAsync(loginViewModel.Email).Result;
                 if (user is not null)
                 {
@@ -130,14 +129,23 @@ namespace Presentation_Layer.Controllers
                         var result = signInManager.PasswordSignInAsync(user, loginViewModel.Password, loginViewModel.RememberMe, false).Result;
                         if (result.Succeeded)
                         {
+                            HttpContext.Session.SetString("UserEmail", loginViewModel.Email);
                             var claims = new List<Claim>
                             {
                                 new Claim(ClaimTypes.Name, user.Firstname) 
                             };
 
+
                             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                             var principal = new ClaimsPrincipal(identity);
                             signInManager.Context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+
+                            var student = unitOfWork.StudentsRepo.GetStudentWithEmail(user.Email).Result;
+                            if (student?.ImageName is not null)
+                            {
+                                HttpContext.Session.SetString("UserImage", student.ImageName);
+                            }
 
                             return RedirectToAction(nameof(HomeController.Index), "Home");
                         }

@@ -1,4 +1,10 @@
-﻿<!DOCTYPE html>
+﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+@{
+    var userEmail = HttpContextAccessor.HttpContext?.Session.GetString("UserEmail");
+    var userImage = HttpContextAccessor.HttpContext?.Session.GetString("UserImage") ?? "/default-profile.png";
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -37,12 +43,18 @@
                     <ul class="navbar-nav">
                         @if (User.Identity.IsAuthenticated)
                         {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Account" asp-action="Profile">Profile</a>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <img src="~/Files/Images/@userImage" alt="Profile Image" class="rounded-circle" width="45" height="45">
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Student" asp-action="Profile">View Profile</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="SignOut">Sign Out</a></li>
+                                </ul>
                             </li>
-                            <li class="nav-item">
+                        @*     <li class="nav-item">
                                 <a class="btn btn-danger text-white px-3" asp-area="" asp-controller="Account" asp-action="SignOut">Sign Out</a>
-                            </li>
+                            </li> *@
                         }
                         else
                         {

@@ -8,7 +8,7 @@ namespace DataAccess_Layer.Repositories
     {
         public Task<IEnumerable<Student>> GetStudentWithNameAsync(string name);
 
-
+        public Task<Student> GetStudentWithEmail(string email);
         public Task<IEnumerable<Student>> GetAllStudentsAsync();
     }
 }

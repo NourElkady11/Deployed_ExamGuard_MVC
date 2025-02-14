@@ -16,12 +16,15 @@ namespace DataAccess_Layer.Repositories
 
         }
 
+
         public async Task<IEnumerable<Student>> GetStudentWithNameAsync(string name)
         {
             return await dbset.Where(e => e.Name.ToLower().Contains(name.ToLower())).Include(d => d.CourseStudents).ThenInclude(c=>c.Course).ToListAsync();
         }
 
         public async Task<IEnumerable<Student>> GetAllStudentsAsync() => await dbset.Include(e => e.CourseStudents).ThenInclude(c=>c.Course).ToListAsync();
+
+        public async Task<Student> GetStudentWithEmail(string email) => await dbset.Include(e => e.CourseStudents).ThenInclude(c => c.Course).Where(e => e.Email == email).FirstOrDefaultAsync();
     }
 
 }
