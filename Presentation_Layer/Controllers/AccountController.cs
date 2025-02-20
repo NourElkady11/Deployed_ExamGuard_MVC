@@ -140,13 +140,16 @@ namespace Presentation_Layer.Controllers
                             var principal = new ClaimsPrincipal(identity);
                             signInManager.Context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-
                             var student = unitOfWork.StudentsRepo.GetStudentWithEmail(user.Email).Result;
                             if (student?.ImageName is not null)
                             {
                                 HttpContext.Session.SetString("UserImage", student.ImageName);
                             }
-
+                            if (loginViewModel.Email == "nourel2ady11@gmail.com")
+                            {
+                                HttpContext.Session.SetString("UserImage","ADMIN.jpg");
+                            }
+                            TempData["ShowWelcome"] = "true";
                             return RedirectToAction(nameof(HomeController.Index), "Home");
                         }
                     }

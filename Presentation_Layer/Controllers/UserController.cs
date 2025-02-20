@@ -77,7 +77,6 @@ namespace Presentation_Layer.Controllers
 				{
 					var user = new ApplicationUser()
 					{
-
 						Firstname = userViewModel.FirstName,
 						Lastname = userViewModel.LastName,
 						UserName = userViewModel.Username,
@@ -96,7 +95,6 @@ namespace Presentation_Layer.Controllers
 			}
 			return View(userViewModel);
 		}
-
 
 
 

@@ -38,6 +38,10 @@ namespace Presentation_Layer
             builder.Services.AddSession(); // Add session services
             builder.Services.AddHttpContextAccessor(); // Allow access to HttpContext.Session
 
+            builder.Services.AddHttpClient("MyHttpClient", client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(30);  // Set timeout here
+            });
 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IExamService, ExamService>();

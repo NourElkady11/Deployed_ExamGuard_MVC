@@ -2,21 +2,12 @@
 @{
     ViewData["Title"] = "Exams";
 }
+
 <head>
     <link rel="stylesheet" href="~/css/GetStudentExamss.css" asp-append-version="true" />
 </head>
 
 <div class="home-container">
-    <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <h1>ExamGuard Platform</h1>
-            <div class="user-info">
-                <span>Welcome ya 7ag @User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value!</span>
-            </div>
-        </div>
-    </header>
-    <!-- Main Content -->
     <main class="dashboard">
         <h2>Your Exams</h2>
         <div class="exam-list">
@@ -27,34 +18,22 @@
                     <p><strong>Subject:</strong> @exam.Subject</p>
                     <p><strong>Duration:</strong> @exam.Duration minutes</p>
                     <p><strong>Start Time:</strong> @exam.StartTime.ToString("f")</p>
-                    <button class="btn @(exam.Status == "upcoming" ? "btn-primary" : "btn-secondary")"
-                    @(exam.Status == "completed" ? "disabled" : "")
-                            onclick="startExam(@exam.Id)">
-                        @(exam.Status == "upcoming" ? "Start Exam" : "View Results")
-                    </button>
+
+                    @if (exam.Status == "upcoming")
+                    {
+                        <a href="@Url.Action("GoToExam", "Student", new { examId = exam.Id })"
+                           class="btn btn-primary">
+                            Start Exam
+                        </a>
+                    }
+                    else
+                    {
+                        <button class="btn btn-secondary" disabled>View Results</button>
+                    }
                 </div>
             }
         </div>
     </main>
 </div>
-
-<script>
-    function startExam(examId) {
-        fetch(`/Student/StartExam/${examId}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        })
-            .then(response => {
-                if (response.ok) {
-                    alert("Exam started successfully!");
-                } else {
-                    alert("Failed to start the exam.");
-                }
-            })
-            .catch(error => alert("Error: " + error));
-    }
-</script>
 
 

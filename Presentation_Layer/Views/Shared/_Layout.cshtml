@@ -29,15 +29,39 @@
 
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav mx-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Student" asp-action="Index">My Courses</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Student" asp-action="GetAllGrades">Results</a>
-                        </li>
+                         @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            </li>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="User" asp-action="Index">Users</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Role" asp-action="Index">Roles</a>
+                                </li>
+                            }
+                            @if (User.IsInRole("SuperVisor"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Exams" asp-action="Index">Exams</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Report" asp-action="Index">Report</a>
+                                </li>
+                            }
+                            @if (User.IsInRole("Student"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Student" asp-action="Index">My Courses</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-area="" asp-controller="Student" asp-action="GetAllGrades">Results</a>
+                                </li> 
+                            }
+                        } 
                     </ul>
 
                     <ul class="navbar-nav">
@@ -52,9 +76,6 @@
                                     <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="SignOut">Sign Out</a></li>
                                 </ul>
                             </li>
-                        @*     <li class="nav-item">
-                                <a class="btn btn-danger text-white px-3" asp-area="" asp-controller="Account" asp-action="SignOut">Sign Out</a>
-                            </li> *@
                         }
                         else
                         {
@@ -87,5 +108,6 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Validation", required: false)
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

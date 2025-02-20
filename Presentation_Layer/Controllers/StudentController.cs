@@ -1,18 +1,20 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Services;
 using Services.Abstraction;
+using System.Net.Http;
 
 namespace Presentation_Layer.Controllers
 {
-    public class StudentController(IExamService examService,IServiceManger serviceManger) : Controller
+    public class StudentController(IExamService examService, IServiceManger serviceManger, HttpClient _httpClient) : Controller
     {
         [Authorize(Roles = "Student")]
         public async Task<IActionResult> Index()
         {
             var exams = await serviceManger.examService.GetExams();
             return View(exams);
-           
+
         }
 
         public async Task<IActionResult> GetAllGrades()
@@ -31,62 +33,118 @@ namespace Presentation_Layer.Controllers
         }
 
 
-
-
         [HttpPost]
-        public IActionResult StartExam(int examId)
+        public async Task<IActionResult> StartExam(int examId)
         {
-         
             try
             {
-                // Updated paths
-                var pythonExePath = @"C:\Users\Actel\anaconda3\envs\ElkadyEnv\python.exe";
-                var pythonFilePath = @"C:\Users\Actel\Downloads\YOLOv10\webcam-interface.py";
+                // Redirect to GoToExam action with the examId
+                return RedirectToAction("GoToExam", new { examId = examId });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error: {ex.Message}");
+            }
+        }
 
-                // Ensure paths are valid
-                if (!System.IO.File.Exists(pythonExePath))
+
+        public async Task<IActionResult> GoToExam(int examId)
+        {
+            // Render the GoToExam page immediately
+            ViewData["ExamId"] = examId;
+            return View(examId); // Pass the examId to the view
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetDetectionResults(int examId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("http://localhost:5000/start_exam");
+                if (response.IsSuccessStatusCode)
                 {
-                    return StatusCode(500, $"Python executable not found at {pythonExePath}");
-                }
-                if (!System.IO.File.Exists(pythonFilePath))
-                {
-                    return StatusCode(500, $"Python script not found at {pythonFilePath}");
-                }
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    var detections = JsonConvert.DeserializeObject<dynamic>(responseBody);
 
-                // Process configuration
-                var processStartInfo = new System.Diagnostics.ProcessStartInfo
-                {
-                    FileName = pythonExePath,
-                    Arguments = $"\"{pythonFilePath}\"",
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    WorkingDirectory = @"C:\Users\Actel\Downloads\YOLOv10"
-                };
-
-                // Start process
-                using (var process = System.Diagnostics.Process.Start(processStartInfo))
-                {
-                    process.WaitForExit();
-
-                    string output = process.StandardOutput.ReadToEnd();
-                    string error = process.StandardError.ReadToEnd();
-
-                    if (process.ExitCode != 0)
+                    // Extract labels from the current frame's detections
+                    var labels = new List<string>();
+                    foreach (var detection in detections.detections)
                     {
-                        Console.WriteLine($"Error: {error}");
-                        return StatusCode(500, $"Python script error: {error}");
+                        var label = detection.labels[0].ToString();
+                        labels.Add(label);
                     }
 
-                    return Ok($"Exam {examId} started successfully. Output: {output}");
+                    return Json(new { detections = labels });
+                }
+                else
+                {
+                    return StatusCode(500, "Failed to fetch detection results.");
                 }
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Exception occurred: {ex.Message}");
+                return StatusCode(500, $"Error: {ex.Message}");
             }
         }
 
+        [HttpPost]
+        public async Task<IActionResult> SubmitExam(int examId, [FromBody] Dictionary<string, string> examData)
+        {
+            try
+            {
+                // Stop the exam monitoring first
+                await StopExam(examId);
+
+                // Save the exam answers
+              /*  await examService.SubmitExam(examId, examData);*/
+
+                return Json(new { success = true, message = "Exam submitted successfully" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error submitting exam: {ex.Message}");
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> StopExam(int examId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("http://localhost:5000/stop_exam");
+                if (response.IsSuccessStatusCode)
+                {
+                    return Json(new { success = true });
+                }
+                else
+                {
+                    return StatusCode(500, "Failed to stop exam monitoring.");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error: {ex.Message}");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ReceiveDetection([FromBody] dynamic detection)
+        {
+            try
+            {
+                // Extract label from the detection object and show alert
+                var label = detection.label[0].ToString(); // Extract the label
+                Console.WriteLine($"Cheating Detected: {label}");  // Log the detection
+                TempData["detections"] = label;
+
+                // You can return the detection label or other data
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                return StatusCode(500, "Error processing detection");
+            }
+        }
     }
 }
