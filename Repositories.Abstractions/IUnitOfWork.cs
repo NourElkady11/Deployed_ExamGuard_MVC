@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Repositories.Abstractions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +11,7 @@ namespace DataAccess_Layer.Repositories
     {
         public IStudentRepoistory StudentsRepo { get; }
         public ICourseRepositorys CoursesRepo { get; }
+        public ISuperVisorRepository SuperVisorRepository { get; }
         public Task <int> SaveChangesAsync();
     }
 }

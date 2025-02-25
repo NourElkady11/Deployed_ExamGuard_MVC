@@ -11,21 +11,23 @@ using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pag
 using Presentation_Layer.Utilities;
 using Presentation_Layer.ViewModels;
 using DataAccess_Layer.Data;
+using Data.Models;
 
 namespace Presentation_Layer.Controllers
 {
 	[Authorize(Roles = "Admin")]	
-	public class UserController : Controller
+	public class UserController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager) : Controller
 	{
-		private readonly UserManager<ApplicationUser> userManager;
+	/*	private readonly UserManager<ApplicationUser> userManager;
 
 		public UserController(UserManager<ApplicationUser> userManager)
 		{
 			this.userManager = userManager;
 		}
-
+*/
 		public async Task<IActionResult> Index(string email)
 		{
+			
 			if (string.IsNullOrWhiteSpace(email))
 			{
 				var user = await userManager.Users.Select(user => new UserViewModel
@@ -43,7 +45,8 @@ namespace Presentation_Layer.Controllers
 			}
 			else
 			{
-				var user = await userManager.FindByEmailAsync(email);
+				var EmailTrimed=email.Trim();
+				var user = await userManager.FindByEmailAsync(EmailTrimed);
 				if (user is null)
 				{
 					return View(Enumerable.Empty<UserViewModel>);
@@ -83,7 +86,25 @@ namespace Presentation_Layer.Controllers
 						Email = userViewModel.Email,
 					};
                     var Result = userManager.CreateAsync(user, userViewModel.Password).Result;
-					return RedirectToAction(nameof(Index));
+					var supervisor = new SuperVisor()
+					{
+						FirstName = userViewModel.FirstName,
+						LastName = userViewModel.LastName,
+						Username = userViewModel.Username,
+						Email = userViewModel.Email,
+
+					};
+					if(userViewModel.Image is not null)
+					{
+						supervisor.ImageName = await DocumentSetting.uploadFile(userViewModel.Image, "Images");
+                    }
+
+					await unitOfWork.SuperVisorRepository.CreateAsync(supervisor);
+					await unitOfWork.SaveChangesAsync();
+
+
+
+                    return RedirectToAction(nameof(Index));
 				}
 				catch (Exception ex)
 				{

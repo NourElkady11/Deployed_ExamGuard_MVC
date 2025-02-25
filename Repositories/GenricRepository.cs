@@ -15,7 +15,6 @@ namespace DataAccess_Layer.Repositories
         protected DataContext context;
         protected DbSet<Tentity> dbset;
 
-
         public GenricRepository(DataContext context)
         {
             this.context = context;
@@ -33,6 +32,8 @@ namespace DataAccess_Layer.Repositories
         }
 
         public async Task<Tentity?> GetAsync(int id) => await dbset.FindAsync(id);
+
+
         public async Task<IEnumerable<Tentity>> GetAllAsync() => await dbset.ToListAsync();
 
 

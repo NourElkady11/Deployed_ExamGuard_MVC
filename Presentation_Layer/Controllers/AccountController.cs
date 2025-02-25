@@ -113,6 +113,7 @@ namespace Presentation_Layer.Controllers
         [HttpPost]
         public IActionResult Login(LoginViewModel loginViewModel)
         {
+          
             if (!ModelState.IsValid)
             {
                 return View(loginViewModel);
@@ -139,11 +140,15 @@ namespace Presentation_Layer.Controllers
                             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                             var principal = new ClaimsPrincipal(identity);
                             signInManager.Context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-
+                            var superVisor = unitOfWork.SuperVisorRepository.GetSuperVisorWithEmail(user.Email).Result;
                             var student = unitOfWork.StudentsRepo.GetStudentWithEmail(user.Email).Result;
                             if (student?.ImageName is not null)
                             {
                                 HttpContext.Session.SetString("UserImage", student.ImageName);
+                            }
+                            if (superVisor?.ImageName is not null)
+                            {
+                                HttpContext.Session.SetString("UserImage", superVisor.ImageName);
                             }
                             if (loginViewModel.Email == "nourel2ady11@gmail.com")
                             {

@@ -9,7 +9,19 @@
         <div class="col-md-6">
             <h1 class="fw-bold text-primary">Welcome to ExamGuard</h1>
             <p class="lead">The most advanced AI-powered online exam system with secure monitoring to ensure a fair Exam environment</p>
-            <a href="/Student/Index" class="btn btn-primary btn-lg mt-3">Explore My Courses</a>
+            @if (User.IsInRole("Admin"))
+            {
+                <a href="/User/Index" class="btn btn-primary btn-lg mt-3">Explore My Users</a>
+            }
+            @if (User.IsInRole("SuperVisor"))
+            {
+                <a href="/Exams/Index" class="btn btn-primary btn-lg mt-3">Explore My Students</a>
+            }
+            @if (User.IsInRole("Student"))
+            {
+                <a href="/Student/Index" class="btn btn-primary btn-lg mt-3">Explore My Courses</a>
+            }
+          
         </div>
 
         <div class="col-md-6 text-center">
@@ -38,12 +50,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Call to Action -->
-    <div class="text-center mt-5">
-        <h3>Ready to take a secure online exam?</h3>
-        <a href="/Student/Index" class="btn btn-success btn-lg mt-3">Start My Exam</a>
-    </div>
 </div>
 
 @section Scripts {
@@ -51,6 +57,7 @@
         $(document).ready(function () {
         @if (TempData["ShowWelcome"]?.ToString() == "true")
         {
+            TempData["ShowWelcome"] = "false";
             <text>
                  const userName = '@User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value';
                 if (userName) {
