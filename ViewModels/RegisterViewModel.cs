@@ -33,6 +33,7 @@ namespace Presentation_Layer.ViewModels
 
         public bool Isagree { get; set; }
 
+		[Required]
         public IFormFile? Image { get; set; }
 
         public string? ImageName { get; set; }

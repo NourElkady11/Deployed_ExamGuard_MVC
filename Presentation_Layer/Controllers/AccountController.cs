@@ -30,6 +30,11 @@ namespace Presentation_Layer.Controllers
             {
                 return View(registerViewModel);
             }
+            if (!System.Text.RegularExpressions.Regex.IsMatch(registerViewModel.Phone, @"^(010|011|012|015)\d{8}$"))
+            {
+                ModelState.AddModelError("Phone", "Invalid phone number format.");
+                return View(registerViewModel);
+            }
             else
             {
                 var FindUser = await userManager.FindByEmailAsync(registerViewModel.Email);
