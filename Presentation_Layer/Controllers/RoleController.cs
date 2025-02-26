@@ -26,7 +26,7 @@ namespace Presentation_Layer.Controllers
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                var role = await roleManager.Roles.Select(r => new RoleViewModel
+                var role = await roleManager.Roles.Where(r=>r.Name!="Student").Select(r => new RoleViewModel
                 {
                     Id = r.Id,
                     Name = r.Name
@@ -207,20 +207,26 @@ namespace Presentation_Layer.Controllers
         public async Task<IActionResult> AddOrRemoveUsers(string roleId)
         {
             var role = await roleManager.FindByIdAsync(roleId);
+ 
             if (role is null) { return NotFound(); }
             ViewBag.RoleId = roleId;
+            ViewBag.RoleName=role.Name;
             var users = await userManager.Users.ToListAsync();
             var usersInRole = new List<UserInRoleViewModel>();
 
             foreach (var user in users)
             {
-                var UserInRole = new UserInRoleViewModel
+				if (await userManager.IsInRoleAsync(user, "Student"))
+				{
+					continue;
+				}
+				var UserInRole = new UserInRoleViewModel
                 {
                     UserId = user.Id,
                     UserName = user.UserName,
                     IsInRnole = await userManager.IsInRoleAsync(user, role.Name)
                 };
-                usersInRole.Add(UserInRole);
+                     usersInRole.Add(UserInRole);
             }
 
 
