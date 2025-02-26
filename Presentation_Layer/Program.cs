@@ -34,7 +34,7 @@ namespace Presentation_Layer
             });
             builder.Services.AddAutoMapper(typeof(Program).Assembly);
             builder.Services.AddAutoMapper(typeof(Reference).Assembly);
-
+ 
             builder.Services.AddSession(); // Add session services
             builder.Services.AddHttpContextAccessor(); // Allow access to HttpContext.Session
 

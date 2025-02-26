@@ -26,13 +26,27 @@ namespace Presentation_Layer.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel registerViewModel)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(registerViewModel);
-            }
             if (!System.Text.RegularExpressions.Regex.IsMatch(registerViewModel.Phone, @"^(010|011|012|015)\d{8}$"))
             {
                 ModelState.AddModelError("Phone", "Invalid phone number format.");
+                return View(registerViewModel);
+            }
+            if (registerViewModel.Image != null)
+            {
+                var extension = Path.GetExtension(registerViewModel.Image.FileName).ToLower();
+
+                // Check MIME type
+                var allowedContentTypes = new[] { "image/jpeg", "image/jpg", "image/png" };
+
+                if (extension != ".jpg" && extension != ".jpeg" && extension != ".png" ||
+                    !allowedContentTypes.Contains(registerViewModel.Image.ContentType))
+                {
+                    ModelState.AddModelError("Image", "Only image files (JPG, JPEG, PNG) are allowed.");
+                    return View(registerViewModel);
+                }
+            }
+            if (!ModelState.IsValid)
+            {
                 return View(registerViewModel);
             }
             else
