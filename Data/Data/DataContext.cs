@@ -1,4 +1,5 @@
 ﻿using Data.Models;
+using DataAccess_Layer.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -33,12 +34,17 @@ namespace Data.Data
                 .WithMany(c => c.CourseStudents)
                 .HasForeignKey(cs => cs.CourseId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Course>().HasMany(e => e.Exams).WithOne(c => c.Course).HasForeignKey(e => e.CourseId);
+
+            modelBuilder.Entity<SuperVisor>().HasMany(s => s.courses).WithOne(s => s.superVisor).HasForeignKey(s => s.SuperVisorId);
         }
 
         public DbSet<Student> Students { get; set; }
         public DbSet<Course> Courses { get; set; }
         public DbSet<SuperVisor> SuperVisors { get; set; }
         public DbSet<CourseStudent> CourseStudents { get; set; }
+        public DbSet<Exam> Exams { get; set; }
 
 
     }

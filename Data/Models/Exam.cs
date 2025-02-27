@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Data.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,8 +11,13 @@ namespace DataAccess_Layer.Models
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public string Type { get; set; }
+        public string Code { get; set; }
         public TimeOnly Duration { get; set;}
         public DateOnly Date { get; set; }
+
+        public Course? Course { get; set; }
+        public int? CourseId { get; set; }
+
+
     }
 }

@@ -17,6 +17,7 @@ namespace DataAccess_Layer.Repositories
         private readonly Lazy<IStudentRepoistory> studentRepoistory;
         private readonly Lazy<ICourseRepositorys> courseRepositorys;
         private readonly Lazy<ISuperVisorRepository> superVisorRepository;
+        private readonly Lazy<IExamRepository> examRepository;
         private readonly DataContext dataContext;
 
         public UnitOfWork(DataContext dataContext)
@@ -25,9 +26,12 @@ namespace DataAccess_Layer.Repositories
             studentRepoistory = new Lazy<IStudentRepoistory>(() => new StudentRepository(dataContext));
             courseRepositorys = new Lazy<ICourseRepositorys>(() => new CourseRepository(dataContext));
             superVisorRepository = new Lazy<ISuperVisorRepository>(() => new SuperVisorRepository(dataContext));
+            examRepository=new Lazy<IExamRepository>(() => new ExamRepository(dataContext));
         }
 
         public IStudentRepoistory StudentsRepo => studentRepoistory.Value;
+
+        public IExamRepository ExamRepository=>examRepository.Value;
 
         public ICourseRepositorys CoursesRepo => courseRepositorys.Value;
 

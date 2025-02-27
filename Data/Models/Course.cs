@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DataAccess_Layer.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -18,5 +19,12 @@ namespace Data.Models
         public DateTime DateTime { get; set; }= DateTime.Now;
 
         public ICollection<CourseStudent>? CourseStudents { get; set; } = new List<CourseStudent>();
+
+        public ICollection<Exam>? Exams { get; set; }= new List<Exam>();
+
+
+        public int? SuperVisorId { get; set; }
+        public SuperVisor? superVisor { get; set; }
+       
     }
 }

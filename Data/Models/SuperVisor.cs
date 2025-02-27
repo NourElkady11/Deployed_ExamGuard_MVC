@@ -21,5 +21,7 @@ namespace Data.Models
 
         public string? ImageName { get; set; }
 
+        public ICollection<Course>? courses { get; set; }=new List<Course>();
+
     }
 }
