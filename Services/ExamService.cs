@@ -15,8 +15,7 @@ namespace Services
                new ExamViewModel
                {
                    Id = 1,
-                   Title = "Data-Structure",
-                   Subject = "Mathematics",
+                   Subject = "Data-Structure",
                    Duration = 60,
                    StartTime = DateTime.Now.AddHours(1),
                    Status = "upcoming"
@@ -24,7 +23,6 @@ namespace Services
                new ExamViewModel
                {
                    Id = 2,
-                   Title = "Physics",
                    Subject = "Physics",
                    Duration = 90,
                    StartTime = DateTime.Now.AddHours(2),

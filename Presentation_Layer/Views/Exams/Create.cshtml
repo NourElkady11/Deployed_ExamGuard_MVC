@@ -1,0 +1,17 @@
+﻿@model ExamViewModel
+@inject IUnitOfWork unitOfWork
+@{
+    var SuperVisors = unitOfWork.SuperVisorRepository.GetAllAsync();
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create Exam</h1>
+<div class="container">
+    <form method="post" asp-action="Create">
+
+   
+
+     
+    </form>
+</div>
+
