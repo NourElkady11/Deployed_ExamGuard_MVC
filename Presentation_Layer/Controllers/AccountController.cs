@@ -173,7 +173,11 @@ namespace Presentation_Layer.Controllers
                             {
                                 HttpContext.Session.SetString("UserImage","ADMIN.jpg");
                             }
-                            TempData["ShowWelcome"] = "true";
+                            HttpContext.Session.SetString("ShowWelcome", "true");
+
+                            // Generate a unique welcome ID for this login session
+                            string welcomeId = Guid.NewGuid().ToString();
+                            HttpContext.Session.SetString("WelcomeId", welcomeId);
                             return RedirectToAction(nameof(HomeController.Index), "Home");
                         }
                     }

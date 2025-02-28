@@ -21,14 +21,11 @@
             {
                 <a href="/Student/Index" class="btn btn-primary btn-lg mt-3">Explore My Courses</a>
             }
-          
         </div>
-
         <div class="col-md-6 text-center">
             <img src="~/Files/Images/Stop_Cheating.png" class="img-fluid rounded shadow-lg" alt="Cheating Detection">
         </div>
     </div>
-
     <!-- Features Section -->
     <div class="mt-5">
         <h2 class="fw-bold text-center">How We Prevent Cheating?</h2>
@@ -55,33 +52,40 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-        @if (TempData["ShowWelcome"]?.ToString() == "true")
+            // This is the key solution - use a combination of session storage and a unique ID
+            const welcomeId = '@ViewBag.WelcomeId';
+            const welcomeKey = 'welcomeShown_' + welcomeId;
+
+        @if (ViewBag.ShowWelcome == "true")
         {
-            TempData["ShowWelcome"] = "false";
             <text>
-                 const userName = '@User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value';
-                if (userName) {
-                    const alertDiv = document.createElement('div');
-                    alertDiv.className = 'alert alert-success';
-                    alertDiv.style.position = 'fixed';
-                    alertDiv.style.top = '78px';
-                    alertDiv.style.right = '20px';
-                    alertDiv.style.padding = '15px';
-                    alertDiv.style.zIndex = '1000';
-                    alertDiv.textContent = 'Welcome ya 7ag ' + userName;
+                  if(!sessionStorage.getItem(welcomeKey)) {
+                    const userName = '@User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value';
+                    if (userName) {
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = 'alert alert-success';
+                        alertDiv.style.position = 'fixed';
+                        alertDiv.style.top = '78px';
+                        alertDiv.style.right = '20px';
+                        alertDiv.style.padding = '15px';
+                        alertDiv.style.zIndex = '1000';
+                        alertDiv.textContent = 'Welcome ya 7ag ' + userName;
 
-                    document.body.appendChild(alertDiv);
+                        document.body.appendChild(alertDiv);
 
-                    // Fade out effect
-                    setTimeout(() => {
-                        alertDiv.style.transition = 'opacity 0.5s';
-                        alertDiv.style.opacity = '0';
-                        setTimeout(() => alertDiv.remove(), 500);
-                    }, 2800);
+                        // Fade out effect
+                        setTimeout(() => {
+                            alertDiv.style.transition = 'opacity 0.5s';
+                            alertDiv.style.opacity = '0';
+                            setTimeout(() => alertDiv.remove(), 500);
+                        }, 2800);
+
+                        // Mark that we've shown the welcome message for this login session
+                        sessionStorage.setItem(welcomeKey, 'true');
+                    }
                 }
             </text>
         }
-        });
+                });
     </script>
 }
-

@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Presentation_Layer.ViewModels;
 using System.Diagnostics;
-
 namespace Presentation_Layer.Controllers
 {
    
@@ -16,7 +15,10 @@ namespace Presentation_Layer.Controllers
         }
         public IActionResult Index()
         {
+            ViewBag.ShowWelcome = HttpContext.Session.GetString("ShowWelcome");
+            ViewBag.WelcomeId = HttpContext.Session.GetString("WelcomeId");
 
+            HttpContext.Session.Remove("ShowWelcome");
             return View();
         }
        
