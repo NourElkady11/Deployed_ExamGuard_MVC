@@ -98,6 +98,8 @@ namespace Presentation_Layer.Controllers
 					{
 						supervisor.ImageName = await DocumentSetting.uploadFile(userViewModel.Image, "Images");
                     }
+				
+
 
 					await unitOfWork.SuperVisorRepository.CreateAsync(supervisor);
 					await unitOfWork.SaveChangesAsync();

@@ -3,6 +3,7 @@
 @{
     var userEmail = HttpContextAccessor.HttpContext?.Session.GetString("UserEmail");
     var userImage = HttpContextAccessor.HttpContext?.Session.GetString("UserImage") ?? "/default-profile.png";
+    userImage = string.IsNullOrEmpty(userImage) ? "/Images/DefaultImage.png" : userImage;
 }
 <!DOCTYPE html>
 <html lang="en">

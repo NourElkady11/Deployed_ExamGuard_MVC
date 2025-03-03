@@ -12,7 +12,7 @@ namespace Data.Models
     {
         public int Id { get; set; }
         [Range(0, 500, ErrorMessage = "you are out of the range")]
-        public int? Code { get; set; }
+        public string? Code { get; set; }
         [Required(ErrorMessage = "Name is required")]
         public string? Name { get; set; }
         [Display(Name = "Created at")]

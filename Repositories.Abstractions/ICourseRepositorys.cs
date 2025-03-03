@@ -7,6 +7,7 @@ namespace DataAccess_Layer.Repositories
 {
     public interface ICourseRepositorys : IGenaricRepository<Course>
     {
-    
+        public Task<Course> GetCourseWithExamsAsync(int id);
+        public Task <List<Course>> GetCourseWithSuperVisorssAsync();
     }
 }

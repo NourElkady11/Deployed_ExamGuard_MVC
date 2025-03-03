@@ -17,7 +17,7 @@
                     <h3>@exam.Subject</h3>
                     <p><strong>Subject:</strong> @exam.Subject</p>
                     <p><strong>Duration:</strong> @exam.Duration minutes</p>
-                    <p><strong>Start Time:</strong> @exam.StartTime.ToString("f")</p>
+                    <p><strong>Start Time:</strong> @exam.Date.ToString("f")</p>
 
                     @if (exam.Status == "upcoming")
                     {

@@ -9,7 +9,7 @@ using Services.Abstraction;
 
 namespace Presentation_Layer.Controllers
 {
-    [Authorize(Roles = "Admin,SuperVisor")]
+    [Authorize(Roles = "Admin")]
     public class ExamsController(UserManager<ApplicationUser> userManager, IServiceManger serviceManger,IUnitOfWork unitOfWork) : Controller
     {
         public async Task<IActionResult> Index()

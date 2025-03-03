@@ -16,16 +16,17 @@ namespace Services
                {
                    Id = 1,
                    Subject = "Data-Structure",
-                   Duration = 60,
-                   StartTime = DateTime.Now.AddHours(1),
-                   Status = "upcoming"
+                   Duration = TimeOnly.MaxValue,
+                   Date = DateOnly.MaxValue,
+                   Status = "Pending"
+
                },
                new ExamViewModel
                {
                    Id = 2,
                    Subject = "Physics",
-                   Duration = 90,
-                   StartTime = DateTime.Now.AddHours(2),
+                  Duration = TimeOnly.MaxValue,
+                   Date = DateOnly.MaxValue,
                    Status = "completed"
                }
 

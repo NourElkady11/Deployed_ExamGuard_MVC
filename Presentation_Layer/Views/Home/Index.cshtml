@@ -11,8 +11,11 @@
             <p class="lead">The most advanced AI-powered online exam system with secure monitoring to ensure a fair Exam environment</p>
             @if (User.IsInRole("Admin"))
             {
-                <a href="/User/Index" class="btn btn-primary btn-lg mt-3">Explore My Users</a>
-                <a href="/Exams/Create" class="btn btn-primary btn-lg mt-3">Create Exam</a>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="/User/Index" class="btn btn-primary btn-lg">Manage Users</a>
+                    <a href="/Course/Index" class="btn btn-success btn-lg">Manage Courses</a>
+                    <a href="/Exams/Index" class="btn btn-info btn-lg">Manage Exams</a>
+                </div>
             }
             @if (User.IsInRole("SuperVisor"))
             {
