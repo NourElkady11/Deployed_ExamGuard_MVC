@@ -2,9 +2,12 @@
 
 @{
     var userEmail = HttpContextAccessor.HttpContext?.Session.GetString("UserEmail");
-    var userImage = HttpContextAccessor.HttpContext?.Session.GetString("UserImage") ?? "/default-profile.png";
-    userImage = string.IsNullOrEmpty(userImage) ? "/Images/DefaultImage.png" : userImage;
+    var userImage = HttpContextAccessor.HttpContext?.Session.GetString("UserImage");
+    userImage = string.IsNullOrEmpty(userImage) ? "DefultImage.jpg" : userImage;
+
+ 
 }
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,9 +15,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - ExamGuard</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
     <link rel="stylesheet" href="~/Presentation_Layer.styles.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
     <header>
@@ -30,7 +33,7 @@
 
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav mx-auto">
-                         @if (User.Identity.IsAuthenticated)
+                        @if (User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
@@ -60,9 +63,9 @@
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" asp-area="" asp-controller="Student" asp-action="GetAllGrades">Results</a>
-                                </li> 
+                                </li>
                             }
-                        } 
+                        }
                     </ul>
 
                     <ul class="navbar-nav">
@@ -99,11 +102,6 @@
         </main>
     </div>
 
-@*     <footer class="border-top footer fixed-bottom text-muted bg-black">
-        <div class="container text-white  d-flex justify-content-center align-items-center m-3">
-            &copy; 2024 - Presentation_Layer - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer> *@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

@@ -1,8 +1,9 @@
 ﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 @{
     ViewData["Title"] = "Profile";
-    var userEmail = HttpContextAccessor.HttpContext?.Session.GetString("UserEmail") ?? "No Email Available";
-    var userImage = HttpContextAccessor.HttpContext?.Session.GetString("UserImage") ?? "/default-profile.png";
+    var userEmail = HttpContextAccessor.HttpContext?.Session.GetString("UserEmail");
+    var userImage = HttpContextAccessor.HttpContext?.Session.GetString("UserImage");
+    userImage = string.IsNullOrEmpty(userImage) ? "DefultImage.jpg" : userImage;
     var userName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
 }
 
