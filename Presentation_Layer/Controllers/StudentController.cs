@@ -1,19 +1,24 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Data.Models;
+using DataAccess_Layer.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Presentation_Layer.ViewModels;
 using Services;
 using Services.Abstraction;
 using System.Net.Http;
 
 namespace Presentation_Layer.Controllers
 {
-    public class StudentController(IExamService examService, IServiceManger serviceManger, HttpClient _httpClient) : Controller
+    public class StudentController(IExamService examService, IServiceManger serviceManger, HttpClient _httpClient,IUnitOfWork unitOfWork,IMapper mapper) : Controller
     {
         [Authorize(Roles = "Student")]
         public async Task<IActionResult> Index()
         {
-            var exams = await serviceManger.examService.GetExams();
-            return View(exams);
+            var courses = await unitOfWork.CoursesRepo.GetCourseWithSuperVisorssAsync();
+            return View(courses);
+           
 
         }
 

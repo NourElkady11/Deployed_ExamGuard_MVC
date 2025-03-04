@@ -148,7 +148,7 @@ namespace Presentation_Layer.Controllers
             }
 
             // Before deleting the course, check if it has any exams
-            var courseWithExams = await _unitOfWork.CoursesRepo.GetCourseWithExamsAsync(id);
+            var courseWithExams = await _unitOfWork.CoursesRepo.GetCourseWithExamAsync(id);
             if (courseWithExams.Exams != null && courseWithExams.Exams.Any())
             {
                 // Redirect back to course list with error message

@@ -1,39 +1,72 @@
-﻿@model IEnumerable<ExamViewModel>
-@{
-    ViewData["Title"] = "Exams";
-}
+﻿@model IEnumerable<Data.Models.Course>
 
-<head>
-    <link rel="stylesheet" href="~/css/GetStudentExamss.css" asp-append-version="true" />
-</head>
-
-<div class="home-container">
-    <main class="dashboard">
-        <h2>Your Exams</h2>
-        <div class="exam-list">
-            @foreach (var exam in Model)
-            {
-                <div class="exam-item">
-                    <h3>@exam.Subject</h3>
-                    <p><strong>Subject:</strong> @exam.Subject</p>
-                    <p><strong>Duration:</strong> @exam.Duration minutes</p>
-                    <p><strong>Start Time:</strong> @exam.Date.ToString("f")</p>
-
-                    @if (exam.Status == "upcoming")
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+                    <h3 class="card-title m-0"><i class="fas fa-book"></i> Your Courses</h3>
+                </div>
+                <div class="card-body">
+                    @if (Model != null && Model.Any())
                     {
-                        <a href="@Url.Action("GoToExam", "Student", new { examId = exam.Id })"
-                           class="btn btn-primary">
-                            Start Exam
-                        </a>
+                        <table class="table table-bordered table-hover text-center align-middle">
+                            <thead class="table-dark text-white">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Course Name</th>
+                                    <th>Code</th>
+                                    <th>Created At</th>
+                                    <th>Supervisor</th>
+                                    <th>Exams</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var course in Model)
+                                {
+                                    <tr>
+                                        <td>@course.Id</td>
+                                        <td class="fw-bold">@course.Name</td>
+                                        <td>@course.Code</td>
+                                        <td>@course.DateTime.ToString("dd MMM yyyy")</td>
+                                        <td>
+                                            @if (course.SuperVisorId.HasValue && course.superVisor != null)
+                                            {
+                                                <span class="badge bg-success">@($"{course.superVisor.FirstName} {course.superVisor.LastName}")</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Not Assigned</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">@(@course.Exams?.Count ?? 0) Exams</span>
+                                        </td>
+                                        <td>
+                                            <a href="@Url.Action("Details", "Student", new { id = course.Id })"
+                                               class="btn btn-sm btn-outline-info">
+                                                <i class="fas fa-info-circle"></i> Details
+                                            </a>
+                                            <a href="@Url.Action("Exams", "Student", new { courseId = course.Id })"
+                                               class="btn btn-sm btn-outline-warning">
+                                                <i class="fas fa-file-alt"></i> View Exams
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
                     }
                     else
                     {
-                        <button class="btn btn-secondary" disabled>View Results</button>
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-exclamation-circle"></i> No courses available at the moment.
+                        </div>
                     }
                 </div>
-            }
+            </div>
         </div>
-    </main>
+    </div>
 </div>
-
 
