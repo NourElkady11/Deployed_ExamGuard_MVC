@@ -50,7 +50,7 @@ namespace Presentation_Layer.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Create new course entity
+         
                 var course = new Course
                 {
                     Name = courseViewModel.Name,
@@ -59,14 +59,14 @@ namespace Presentation_Layer.Controllers
                     SuperVisorId = courseViewModel.SuperVisorId
                 };
 
-                // Add course to repository
+            
                 await _unitOfWork.CoursesRepo.CreateAsync(course);
                 await _unitOfWork.SaveChangesAsync();
 
                 return RedirectToAction(nameof(Index));
             }
 
-            // If we get here, something failed - redisplay form
+          
             courseViewModel.Supervisors = await GetSupervisorsAsSelectListItems();
             return View(courseViewModel);
         }
@@ -109,19 +109,18 @@ namespace Presentation_Layer.Controllers
                     return NotFound();
                 }
 
-                // Update course properties
+            
                 course.Name = courseViewModel.Name;
                 course.Code = courseViewModel.Code;
                 course.SuperVisorId = courseViewModel.SuperVisorId;
 
-                // Update in repository
                 _unitOfWork.CoursesRepo.Update(course);
                 await _unitOfWork.SaveChangesAsync();
 
                 return RedirectToAction(nameof(Index));
             }
 
-            // If we get here, something failed - redisplay form
+
             courseViewModel.Supervisors = await GetSupervisorsAsSelectListItems();
             return View(courseViewModel);
         }
@@ -147,28 +146,27 @@ namespace Presentation_Layer.Controllers
                 return NotFound();
             }
 
-            // Before deleting the course, check if it has any exams
             var courseWithExams = await _unitOfWork.CoursesRepo.GetCourseWithExamAsync(id);
             if (courseWithExams.Exams != null && courseWithExams.Exams.Any())
             {
-                // Redirect back to course list with error message
+               
                 TempData["ErrorMessage"] = "Cannot delete course that has exams assigned to it. Delete the exams first.";
                 return RedirectToAction(nameof(Index));
             }
 
-            // Delete the course
+           
             _unitOfWork.CoursesRepo.Delete(course);
             await _unitOfWork.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }
 
-        // Helper method to get supervisors as select list items
+      
         private async Task<List<SelectListItem>> GetSupervisorsAsSelectListItems()
         {
             var supervisors = await _unitOfWork.SuperVisorRepository.GetAllAsync();
 
-            // Get users with Supervisor role
+
             var supervisorUsers = await _userManager.GetUsersInRoleAsync("Supervisor");
             var supervisorEmails = supervisorUsers.Select(u => u.Email).ToList();
 
@@ -182,7 +180,7 @@ namespace Presentation_Layer.Controllers
                 .ToList();
         }
 
-        // Action to create exam for a specific course
+ 
         public async Task<IActionResult> CreateExam(int courseId)
         {
             var course = await _unitOfWork.CoursesRepo.GetAsync(courseId);
@@ -191,7 +189,7 @@ namespace Presentation_Layer.Controllers
                 return NotFound();
             }
 
-            // Redirect to the exam creation form with the course ID pre-filled
+        
             TempData["CourseId"] = courseId;
             TempData["CourseName"] = course.Name;
             return RedirectToAction("Create", "Exams");
