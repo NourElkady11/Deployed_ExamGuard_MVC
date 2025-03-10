@@ -64,7 +64,7 @@
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-info">Edit</a>
                     <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
-                    <a asp-action="CreateExam" asp-route-courseId="@item.Id" class="btn btn-sm btn-success">Add Exam</a>
+                    <a asp-action="Create" asp-controller="Exams" asp-route-courseId="@item.Id" class="btn btn-sm btn-success">Add Exam</a>
                 </td>
             </tr>
         }

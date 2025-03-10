@@ -17,7 +17,7 @@ namespace Repositories
 
         public CourseRepository(DataContext context) : base(context)
         {
-
+            this.dataContext = context;
         }
         public async Task<List<Course>> GetCourseWithSuperVisorssAsync()
         {
@@ -31,7 +31,7 @@ namespace Repositories
 
         public async Task<Course> GetCourseWithExamAsync(int id)
         {
-            return await dbset.Include(e => e.Exams).Where(e => e.Id == id).FirstOrDefaultAsync();
+            return await dbset.Include(e => e.Exams).Include(e=>e.superVisor).Where(e => e.Id == id).FirstOrDefaultAsync();
         
         }
 

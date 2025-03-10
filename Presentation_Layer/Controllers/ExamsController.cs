@@ -1,4 +1,5 @@
-﻿using DataAccess_Layer.Data;
+﻿using Data.Models;
+using DataAccess_Layer.Data;
 using DataAccess_Layer.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -17,8 +18,9 @@ namespace Presentation_Layer.Controllers
             return View();
         }
 
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Create(int courseId)
         {
+            var course = await unitOfWork.CoursesRepo.GetAsync(courseId);
             return View();
         }
 

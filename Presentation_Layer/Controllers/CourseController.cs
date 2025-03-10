@@ -127,7 +127,7 @@ namespace Presentation_Layer.Controllers
 
         public async Task<IActionResult> Delete(int id)
         {
-            var course = await _unitOfWork.CoursesRepo.GetAsync(id);
+            var course = await _unitOfWork.CoursesRepo.GetCourseWithExamAsync(id);
             if (course == null)
             {
                 return NotFound();
@@ -140,28 +140,24 @@ namespace Presentation_Layer.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var course = await _unitOfWork.CoursesRepo.GetAsync(id);
+            var course = await _unitOfWork.CoursesRepo.GetCourseWithExamAsync(id);
             if (course == null)
             {
                 return NotFound();
             }
 
-            var courseWithExams = await _unitOfWork.CoursesRepo.GetCourseWithExamAsync(id);
-            if (courseWithExams.Exams != null && courseWithExams.Exams.Any())
+            if (course.Exams != null && course.Exams.Any())
             {
-               
                 TempData["ErrorMessage"] = "Cannot delete course that has exams assigned to it. Delete the exams first.";
                 return RedirectToAction(nameof(Index));
             }
 
-           
             _unitOfWork.CoursesRepo.Delete(course);
             await _unitOfWork.SaveChangesAsync();
-
             return RedirectToAction(nameof(Index));
         }
 
-      
+
         private async Task<List<SelectListItem>> GetSupervisorsAsSelectListItems()
         {
             var supervisors = await _unitOfWork.SuperVisorRepository.GetAllAsync();
@@ -181,18 +177,5 @@ namespace Presentation_Layer.Controllers
         }
 
  
-        public async Task<IActionResult> CreateExam(int courseId)
-        {
-            var course = await _unitOfWork.CoursesRepo.GetAsync(courseId);
-            if (course == null)
-            {
-                return NotFound();
-            }
-
-        
-            TempData["CourseId"] = courseId;
-            TempData["CourseName"] = course.Name;
-            return RedirectToAction("Create", "Exams");
-        }
     }
 }
