@@ -21,7 +21,7 @@
             <p class="profile-email">@userEmail</p>
 
             <div class="profile-stats">
-                <div class="stat-item">
+       @*          <div class="stat-item">
                     <span class="stat-value">@ViewBag.ExamsCompleted</span>
                     <span class="stat-label">Exams Completed</span>
                 </div>
@@ -32,7 +32,7 @@
                 <div class="stat-item">
                     <span class="stat-value">@ViewBag.UpcomingExams</span>
                     <span class="stat-label">Upcoming Exams</span>
-                </div>
+                </div> *@
             </div>
         </div>
 
@@ -40,9 +40,14 @@
             <a href="@Url.Action("EditProfile", "Student")" class="btn btn-primary">
                 <i class="fas fa-edit"></i> Edit Profile
             </a>
-            <a href="@Url.Action("GetAllGrades", "Student")" class="btn btn-info">
-                <i class="fas fa-graduation-cap"></i> View Grades
-            </a>
+            @{
+                if (User.IsInRole("Studnet"))
+                {
+                    <a href="@Url.Action("GetAllGrades", "Student")" class="btn btn-info">
+                        <i class="fas fa-graduation-cap"></i> View Grades
+                    </a>
+                }
+            }
             <a href="@Url.Action("SignOut", "Account")" class="btn btn-danger">
                 <i class="fas fa-sign-out-alt"></i> Sign Out
             </a>
