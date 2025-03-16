@@ -1,0 +1,61 @@
+﻿@model IEnumerable<Data.Models.Course>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+                    <h3 class="card-title m-0"><i class="fas fa-book"></i> Your Courses</h3>
+                </div>
+                <div class="card-body">
+                    @if (Model != null && Model.Any())
+                    {
+                        <table class="table table-bordered table-hover text-center align-middle">
+                            <thead class="table-dark text-white">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Course Name</th>
+                                    <th>Code</th>
+                                    <th>Created At</th>
+                                    <th>Exams</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var course in Model)
+                                {
+                                    <tr>
+                                        <td>@course.Id</td>
+                                        <td class="fw-bold">@course.Name</td>
+                                        <td>@course.Code</td>
+                                        <td>@course.DateTime.ToString("dd MMM yyyy")</td>
+                                        <td>
+                                            <span class="badge bg-info">@(@course.Exams?.Count ?? 0) Exams</span>
+                                        </td>
+                                        <td>
+                                            <a href="@Url.Action("Details", "Student", new { id = course.Id })"
+                                               class="btn btn-sm btn-outline-info">
+                                                <i class="fas fa-info-circle"></i> Details
+                                            </a>
+                                            <a href="@Url.Action("Index", "Report", new { courseId = course.Id })"
+                                               class="btn btn-sm btn-outline-warning">
+                                                <i class="fas fa-file-alt"></i> View Exam Reports
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-exclamation-circle"></i> No courses available at the moment.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

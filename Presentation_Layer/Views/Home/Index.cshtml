@@ -1,6 +1,9 @@
-﻿@{
+﻿@using System.Security.Claims
+@{
     ViewData["Title"] = "Home Page";
+    var userEmail = User.Identity.IsAuthenticated ? User.FindFirst(ClaimTypes.Email)?.Value : "";
 }
+
 <head>
     <link rel="stylesheet" href="~/css/Welcome.css" asp-append-version="true" />
 </head>
@@ -18,7 +21,7 @@
             }
             @if (User.IsInRole("SuperVisor"))
             {
-                <a href="/Exams/Index" class="btn btn-primary btn-lg mt-3">Explore My Students</a>
+                <a asp-action="GetAllCourses" asp-controller="SuperVisor" asp-route-userEmail="@userEmail" class="btn btn-success btn-lg mt-3">Explore My Courses</a>
             }
             @if (User.IsInRole("Student"))
             {

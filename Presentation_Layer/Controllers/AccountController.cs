@@ -152,7 +152,8 @@ namespace Presentation_Layer.Controllers
                             HttpContext.Session.SetString("UserEmail", loginViewModel.Email);
                             var claims = new List<Claim>
                             {
-                                new Claim(ClaimTypes.Name, user.Firstname) 
+                                new Claim(ClaimTypes.Name, user.Firstname),
+                                new Claim(ClaimTypes.Email,user.Email)
                             };
 
 

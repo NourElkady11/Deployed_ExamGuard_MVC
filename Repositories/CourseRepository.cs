@@ -24,6 +24,11 @@ namespace Repositories
             return await dbset.Include(e => e.superVisor).ToListAsync();
         }
 
+        public async Task<List<Course>> GetSuperVisorCourses(int id)
+        {
+            return await dbset.Include(e => e.Exams).Include(e => e.superVisor).Where(e => e.SuperVisorId == id).ToListAsync();
+        }
+
         public async Task<List<Course>> GetCourseWithExamssAsync()
         {
             return await dbset.Include(e => e.Exams).ToListAsync();
@@ -40,6 +45,11 @@ namespace Repositories
             return await dbset.Where(e => e.Name.ToLower().Contains(name.ToLower())).FirstOrDefaultAsync();
         }
 
-    
+
+
+
+     
+
+
     }
 }
