@@ -21,7 +21,7 @@ namespace Repositories
         }
         public async Task<List<Course>> GetCourseWithSuperVisorssAsync()
         {
-            return await dbset.Include(e => e.superVisor).ToListAsync();
+            return await dbset.Include(e => e.superVisor).Include(e=>e.Exams).ToListAsync();
         }
 
         public async Task<List<Course>> GetSuperVisorCourses(int id)

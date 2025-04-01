@@ -19,13 +19,13 @@ namespace Presentation_Layer.Controllers
     public class CourseController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IServiceManger _serviceManger;
+       /* private readonly IServiceManger _serviceManger;*/
         private readonly IUnitOfWork _unitOfWork;
 
-        public CourseController(UserManager<ApplicationUser> userManager, IServiceManger serviceManger, IUnitOfWork unitOfWork)
+        public CourseController(UserManager<ApplicationUser> userManager, /*IServiceManger serviceManger,*/ IUnitOfWork unitOfWork)
         {
             _userManager = userManager;
-            _serviceManger = serviceManger;
+         /*   _serviceManger = serviceManger;*/
             _unitOfWork = unitOfWork;
         }
 
@@ -35,14 +35,23 @@ namespace Presentation_Layer.Controllers
             return View(courses);
         }
 
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> GetCourseExams(int courseid)
         {
+            var exams = await _unitOfWork.ExamRepository.GetCourseExamsAsync(courseid);
+            ViewBag.mycourseId = courseid;
+            return View(exams);
+        }
+
+     
+
+            public async Task<IActionResult> Create()
+            {
             var viewModel = new CourseViewModel
             {
                 Supervisors = await GetSupervisorsAsSelectListItems()
             };
-            return View(viewModel);
-        }
+                 return View(viewModel);
+            }
 
         [HttpPost]
         [ValidateAntiForgeryToken]

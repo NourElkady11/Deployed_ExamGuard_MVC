@@ -10,12 +10,12 @@ using System.Threading.Tasks;
 
 namespace Services
 {
-    public class ServiceManger(IUnitOfWork unitOfWork,IMapper mapper) : IServiceManger
+  /*  public class ServiceManger(IUnitOfWork unitOfWork,IMapper mapper) : IServiceManger
     {
         private readonly Lazy<IExamService> examServicee=new(()=>new ExamService(unitOfWork,mapper));
 
 
         public IExamService examService => examServicee.Value;
       
-    }
+    }*/
 }

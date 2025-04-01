@@ -8,7 +8,7 @@
 <div class="container p-3">
     <div class="row pt-4">
         <div class="col-md-8 offset-md-2">
-            <h2 class="text-primary">Edit Exam</h2>
+            <h2 class="text-primary">Show Exam</h2>
             <div class="card">
                 <div class="card-body">
                     <form asp-action="Edit" method="post">
@@ -23,26 +23,26 @@
 
                         <div class="mb-3">
                             <label asp-for="Subject" class="form-label">Subject</label>
-                            <input asp-for="Subject" class="form-control" />
+                            <input asp-for="Subject" class="form-control" readonly />
                             <span asp-validation-for="Subject" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
                             <label asp-for="Code" class="form-label">Exam Code</label>
-                            <input asp-for="Code" class="form-control" />
+                            <input asp-for="Code" class="form-control" readonly />
                             <span asp-validation-for="Code" class="text-danger"></span>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label asp-for="Date" class="form-label">Date</label>
-                                <input asp-for="Date" class="form-control" type="date" />
+                                <input asp-for="Date" class="form-control" type="date" readonly />
                                 <span asp-validation-for="Date" class="text-danger"></span>
                             </div>
 
                             <div class="col-md-6 mb-3">
                                 <label asp-for="DurationMinutes" class="form-label">Duration (minutes)</label>
-                                <input asp-for="DurationMinutes" class="form-control" type="number" min="1" />
+                                <input asp-for="DurationMinutes" class="form-control" type="number" min="1" readonly />
                                 <span asp-validation-for="DurationMinutes" class="text-danger"></span>
                             </div>
                         </div>
@@ -55,10 +55,10 @@
                                     <div class="card mb-3 question-card">
                                         <div class="card-header d-flex justify-content-between align-items-center">
                                             <h5>Question @(i + 1)</h5>
-                                            @if (i > 0 || Model.Questions.Count > 1)
+                                         @*    @if (i > 0 || Model.Questions.Count > 1)
                                             {
                                                 <button type="button" class="btn btn-danger btn-sm remove-question">Remove</button>
-                                            }
+                                            } *@
                                         </div>
                                         <div class="card-body">
                                             <input type="hidden" asp-for="Questions[i].Id" />
@@ -96,9 +96,7 @@
                                         </div>
                                     </div>
                                 }
-                            </div>
-                            <button type="button" id="add-question" class="btn btn-success">Add Question</button>
-                        </div>
+                
 
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
                             <a asp-controller="Course" asp-action="Index" class="btn btn-secondary me-md-2">Back to Courses</a>
@@ -122,46 +120,46 @@
             $("#add-question").click(function () {
                 var questionCount = $(".question-card").length;
                 var newQuestion = `
-                            <div class="card mb-3 question-card">
-                                <div class="card-header d-flex justify-content-between align-items-center">
-                                    <h5>Question ${questionCount + 1}</h5>
-                                    <button type="button" class="btn btn-danger btn-sm remove-question">Remove</button>
-                                </div>
-                                <div class="card-body">
-                                    <input type="hidden" name="Questions[${questionCount}].Id" value="0" />
+                                    <div class="card mb-3 question-card">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5>Question ${questionCount + 1}</h5>
+                                            <button type="button" class="btn btn-danger btn-sm remove-question">Remove</button>
+                                        </div>
+                                        <div class="card-body">
+                                            <input type="hidden" name="Questions[${questionCount}].Id" value="0" />
 
-                                    <div class="mb-3">
-                                        <label class="form-label">Question Text</label>
-                                        <input name="Questions[${questionCount}].QuestionText" class="form-control" required />
-                                        <span class="text-danger field-validation-valid" data-valmsg-for="Questions[${questionCount}].QuestionText" data-valmsg-replace="true"></span>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label">Correct Answer</label>
-                                        <select name="Questions[${questionCount}].CorrectChoiceIndex" class="form-control">
-                                            <option value="0">Option A</option>
-                                            <option value="1">Option B</option>
-                                            <option value="2">Option C</option>
-                                            <option value="3">Option D</option>
-                                        </select>
-                                    </div>
-
-                                    <h6>Choices</h6>
-                                    <div class="row">
-                                        ${['A', 'B', 'C', 'D'].map((letter, j) => `
-                                            <div class="col-md-6 mb-2">
-                                                <div class="input-group">
-                                                    <span class="input-group-text">${letter}</span>
-                                                    <input type="hidden" name="Questions[${questionCount}].Choices[${j}].Id" value="0" />
-                                                    <input name="Questions[${questionCount}].Choices[${j}].ChoiceText" class="form-control" required />
-                                                </div>
-                                                <span class="text-danger field-validation-valid" data-valmsg-for="Questions[${questionCount}].Choices[${j}].ChoiceText" data-valmsg-replace="true"></span>
+                                            <div class="mb-3">
+                                                <label class="form-label">Question Text</label>
+                                                <input name="Questions[${questionCount}].QuestionText" class="form-control" required />
+                                                <span class="text-danger field-validation-valid" data-valmsg-for="Questions[${questionCount}].QuestionText" data-valmsg-replace="true"></span>
                                             </div>
-                                        `).join('')}
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Correct Answer</label>
+                                                <select name="Questions[${questionCount}].CorrectChoiceIndex" class="form-control">
+                                                    <option value="0">Option A</option>
+                                                    <option value="1">Option B</option>
+                                                    <option value="2">Option C</option>
+                                                    <option value="3">Option D</option>
+                                                </select>
+                                            </div>
+
+                                            <h6>Choices</h6>
+                                            <div class="row">
+                                                ${['A', 'B', 'C', 'D'].map((letter, j) => `
+                                                    <div class="col-md-6 mb-2">
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">${letter}</span>
+                                                            <input type="hidden" name="Questions[${questionCount}].Choices[${j}].Id" value="0" />
+                                                            <input name="Questions[${questionCount}].Choices[${j}].ChoiceText" class="form-control" required />
+                                                        </div>
+                                                        <span class="text-danger field-validation-valid" data-valmsg-for="Questions[${questionCount}].Choices[${j}].ChoiceText" data-valmsg-replace="true"></span>
+                                                    </div>
+                                                `).join('')}
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>
-                        `;
+                                `;
                 $("#questions-container").append(newQuestion);
                 updateQuestionNumbers();
             });

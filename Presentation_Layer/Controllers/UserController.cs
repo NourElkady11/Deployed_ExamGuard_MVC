@@ -175,8 +175,6 @@ namespace Presentation_Layer.Controllers
 			}
 			return View(userViewModel);
 
-
-
 		}
 
 		[HttpPost]

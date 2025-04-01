@@ -2,12 +2,13 @@
 using DataAccess_Layer.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Presentation_Layer.ViewModels;
 using Services.Abstraction;
 
 namespace Presentation_Layer.Controllers
 {
     [Authorize(Roles = "SuperVisor")]
-    public class SuperVisorController(IExamService examService, IServiceManger serviceManger, HttpClient _httpClient, IUnitOfWork unitOfWork, IMapper mapper) : Controller
+    public class SuperVisorController(HttpClient _httpClient, IUnitOfWork unitOfWork, IMapper mapper) : Controller
     {
         public IActionResult Index()
         {
@@ -24,6 +25,41 @@ namespace Presentation_Layer.Controllers
          
             return View(CoursesOfSuperVisor);
         }
+
+        public async Task<IActionResult> GetCourseExams(int courseid)
+        {
+            var exams = await unitOfWork.ExamRepository.GetCourseExamsAsync(courseid);
+            ViewBag.mycourseId = courseid;
+            return View(exams);
+        }
+
+        public async Task<IActionResult> ShowExam(int id)
+        {
+            var exam = await unitOfWork.ExamRepository.GetExamWithQuestionsAndChoicesAsync(id);
+            if (exam == null)
+            {
+                return NotFound();
+            }
+            else
+            {
+                var viewModel = new ExamViewModel
+                {
+                    Id = exam.Id,
+                    Subject = exam.Subject,
+                    Code = exam.Code,
+                    DurationMinutes = exam.Duration.Hour * 60 + exam.Duration.Minute,
+                    Date = exam.Date.ToDateTime(TimeOnly.MinValue),
+                    CourseId = exam.CourseId ?? 0,
+                    CourseName = exam.Course?.Name,
+                    TotalGrade = exam.TotalGrade ?? 0,
+                    Questions = new List<QuestionViewModel>()
+                };
+                return View(viewModel);
+
+            }
+
+        }
+
 
 
     }

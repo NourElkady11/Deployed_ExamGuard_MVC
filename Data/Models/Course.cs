@@ -22,7 +22,6 @@ namespace Data.Models
 
         public ICollection<Exam>? Exams { get; set; }= new List<Exam>();
 
-
         public int? SuperVisorId { get; set; }
         public SuperVisor? superVisor { get; set; }
        

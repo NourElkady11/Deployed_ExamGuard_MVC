@@ -38,6 +38,9 @@ namespace Data.Data
             modelBuilder.Entity<Course>().HasMany(e => e.Exams).WithOne(c => c.Course).HasForeignKey(e => e.CourseId);
 
             modelBuilder.Entity<SuperVisor>().HasMany(s => s.courses).WithOne(s => s.superVisor).HasForeignKey(s => s.SuperVisorId);
+
+            modelBuilder.Entity<Exam>().HasMany(q => q.Questions).WithOne(e => e.Exam).HasForeignKey(q => q.ExamId);
+            modelBuilder.Entity<Question>().HasMany(c => c.Choices).WithOne(q => q.Question).HasForeignKey(c => c.QuestionId);
         }
 
         public DbSet<Student> Students { get; set; }

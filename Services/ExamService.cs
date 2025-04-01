@@ -5,7 +5,7 @@ using Presentation_Layer.ViewModels;
 
 namespace Services
 {
-    public class ExamService(IUnitOfWork unitOfWork,IMapper mapper):IExamService
+   /* public class ExamService(IUnitOfWork unitOfWork,IMapper mapper):IExamService
     {
 
         public async Task<IEnumerable<ExamViewModel>> GetExams()
@@ -35,5 +35,5 @@ namespace Services
             return Exams;
         }
 
-    }
+    }*/
 }

@@ -1,17 +1,184 @@
-﻿@model ExamViewModel
-@inject IUnitOfWork unitOfWork
+﻿@model Presentation_Layer.ViewModels.ExamViewModel
+
 @{
-    var SuperVisors = unitOfWork.SuperVisorRepository.GetAllAsync();
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Create Exam";
 }
 
-<h1>Create Exam</h1>
+<h1>Create Exam for @Model.CourseName</h1>
+
+<hr />
 <div class="container">
-    <form method="post" asp-action="Create">
+    <form asp-action="Create" id="examForm">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" asp-for="CourseId" />
 
-   
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label asp-for="Subject" class="control-label"></label>
+                    <input asp-for="Subject" class="form-control" />
+                    <span asp-validation-for="Subject" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label asp-for="Code" class="control-label"></label>
+                    <input asp-for="Code" class="form-control" />
+                    <span asp-validation-for="Code" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
 
-     
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label asp-for="Date" class="control-label"></label>
+                    <input asp-for="Date" class="form-control" type="date" />
+                    <span asp-validation-for="Date" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label asp-for="DurationMinutes" class="control-label"></label>
+                    <input asp-for="DurationMinutes" class="form-control" />
+                    <span asp-validation-for="DurationMinutes" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <h3>Questions</h3>
+        <div id="questions-container">
+            @for (int i = 0; i < Model.Questions.Count; i++)
+            {
+                <div class="card mb-4 question-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5>Question @(i + 1)</h5>
+                        <button type="button" class="btn btn-danger btn-sm remove-question" data-index="@i">Remove</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="control-label">Question Text</label>
+                            <input name="Questions[@i].QuestionText" class="form-control" value="@Model.Questions[i].QuestionText" required />
+                        </div>
+
+                        <div class="mt-3 mb-2">
+                            <label class="control-label">Choices</label>
+                            <small class="text-muted d-block mb-2">Select the radio button next to the correct answer.</small>
+                        </div>
+
+                        @for (int j = 0; j < Model.Questions[i].Choices.Count; j++)
+                        {
+                            <div class="input-group mb-2">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text">
+                                        <input type="radio" name="Questions[@i].CorrectChoiceIndex" value="@j"
+                                        @(Model.Questions[i].CorrectChoiceIndex == j ? "checked" : "") required />
+                                    </div>
+                                </div>
+                                <input name="Questions[@i].Choices[@j].ChoiceText" class="form-control"
+                                       value="@Model.Questions[i].Choices[j].ChoiceText" placeholder="Choice @(j + 1)" required />
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="mb-4">
+            <button type="button" id="add-question" class="btn btn-success">Add Another Question</button>
+        </div>
+
+        <div>
+            <input type="submit" value="Create" class="btn btn-primary" />
+            <a asp-controller="Course" asp-action="Index" class="btn btn-secondary">Back to Courses</a>
+        </div>
     </form>
 </div>
 
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function () {
+            let questionIndex = @Model.Questions.Count;
+
+            // Add a new question
+            $('#add-question').click(function () {
+                const newQuestion = `
+                                <div class="card mb-4 question-card">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h5>Question ${questionIndex + 1}</h5>
+                                        <button type="button" class="btn btn-danger btn-sm remove-question" data-index="${questionIndex}">Remove</button>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-group">
+                                            <label class="control-label">Question Text</label>
+                                            <input name="Questions[${questionIndex}].QuestionText" class="form-control" required />
+                                        </div>
+
+                                        <div class="mt-3 mb-2">
+                                            <label class="control-label">Choices</label>
+                                            <small class="text-muted d-block mb-2">Select the radio button next to the correct answer.</small>
+                                        </div>
+
+                                        <div class="input-group mb-2">
+                                            <div class="input-group-prepend">
+                                                <div class="input-group-text">
+                                                    <input type="radio" name="Questions[${questionIndex}].CorrectChoiceIndex" value="0" checked required />
+                                                </div>
+                                            </div>
+                                            <input name="Questions[${questionIndex}].Choices[0].ChoiceText" class="form-control" placeholder="Choice 1" required />
+                                        </div>
+
+                                        <div class="input-group mb-2">
+                                            <div class="input-group-prepend">
+                                                <div class="input-group-text">
+                                                    <input type="radio" name="Questions[${questionIndex}].CorrectChoiceIndex" value="1" required />
+                                                </div>
+                                            </div>
+                                            <input name="Questions[${questionIndex}].Choices[1].ChoiceText" class="form-control" placeholder="Choice 2" required />
+                                        </div>
+
+                                        <div class="input-group mb-2">
+                                            <div class="input-group-prepend">
+                                                <div class="input-group-text">
+                                                    <input type="radio" name="Questions[${questionIndex}].CorrectChoiceIndex" value="2" required />
+                                                </div>
+                                            </div>
+                                            <input name="Questions[${questionIndex}].Choices[2].ChoiceText" class="form-control" placeholder="Choice 3" required />
+                                        </div>
+
+                                        <div class="input-group mb-2">
+                                            <div class="input-group-prepend">
+                                                <div class="input-group-text">
+                                                    <input type="radio" name="Questions[${questionIndex}].CorrectChoiceIndex" value="3" required />
+                                                </div>
+                                            </div>
+                                            <input name="Questions[${questionIndex}].Choices[3].ChoiceText" class="form-control" placeholder="Choice 4" required />
+                                        </div>
+                                    </div>
+                                </div>
+                                `;
+
+                $('#questions-container').append(newQuestion);
+                questionIndex++;
+            });
+
+            // Remove a question
+            $(document).on('click', '.remove-question', function () {
+                if ($('.question-card').length > 1) {
+                    $(this).closest('.question-card').remove();
+
+                    // Renumber the questions
+                    $('.question-card').each(function (idx) {
+                        $(this).find('h5').text(`Question ${idx + 1}`);
+                    });
+                } else {
+                    alert('You must have at least one question.');
+                }
+            });
+        });
+    </script>
+}

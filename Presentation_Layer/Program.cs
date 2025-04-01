@@ -44,8 +44,8 @@ namespace Presentation_Layer
             });
 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-            builder.Services.AddScoped<IExamService, ExamService>();
-            builder.Services.AddScoped<IServiceManger, ServiceManger>();
+/*            builder.Services.AddScoped<IExamService, ExamService>();
+            builder.Services.AddScoped<IServiceManger, ServiceManger>();*/
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<DataIdentityContext>().AddDefaultTokenProviders();
 

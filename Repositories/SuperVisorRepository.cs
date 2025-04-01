@@ -19,5 +19,6 @@ namespace Repositories
 
         public async Task<SuperVisor?> GetSuperVisorWithEmail(string email) => await dbset.Where(e => e.Email == email).FirstOrDefaultAsync();
 
+        
     }
 }

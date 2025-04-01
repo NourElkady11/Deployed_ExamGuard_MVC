@@ -13,7 +13,6 @@
                         <table class="table table-bordered table-hover text-center align-middle">
                             <thead class="table-dark text-white">
                                 <tr>
-                                    <th>#</th>
                                     <th>Course Name</th>
                                     <th>Code</th>
                                     <th>Created At</th>
@@ -25,21 +24,16 @@
                                 @foreach (var course in Model)
                                 {
                                     <tr>
-                                        <td>@course.Id</td>
                                         <td class="fw-bold">@course.Name</td>
                                         <td>@course.Code</td>
                                         <td>@course.DateTime.ToString("dd MMM yyyy")</td>
                                         <td>
-                                            <span class="badge bg-info">@(@course.Exams?.Count ?? 0) Exams</span>
+                                            <span class="badge bg-info">@(@course.Exams?.Count ?? 0) Exam</span>
                                         </td>
                                         <td>
-                                            <a href="@Url.Action("Details", "Student", new { id = course.Id })"
-                                               class="btn btn-sm btn-outline-info">
-                                                <i class="fas fa-info-circle"></i> Details
-                                            </a>
-                                            <a href="@Url.Action("Index", "Report", new { courseId = course.Id })"
-                                               class="btn btn-sm btn-outline-warning">
-                                                <i class="fas fa-file-alt"></i> View Exam Reports
+                                            <a asp-action="GetCourseExams" asp-controller="SuperVisor" asp-route-courseid="@course.Id"
+                                               class="btn btn-sm  btn-success">
+                                                <i class="fas fa-info-circle"></i> View Exams
                                             </a>
                                         </td>
                                     </tr>
