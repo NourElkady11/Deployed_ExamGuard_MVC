@@ -18,13 +18,6 @@ namespace Presentation_Layer.Controllers
 	[Authorize(Roles = "Admin")]	
 	public class UserController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager) : Controller
 	{
-	/*	private readonly UserManager<ApplicationUser> userManager;
-
-		public UserController(UserManager<ApplicationUser> userManager)
-		{
-			this.userManager = userManager;
-		}
-*/
 		public async Task<IActionResult> Index(string email)
 		{
 			

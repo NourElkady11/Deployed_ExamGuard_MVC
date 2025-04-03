@@ -11,7 +11,7 @@ using System.Net.Http;
 
 namespace Presentation_Layer.Controllers
 {
-    public class StudentController(IExamService examService, /*IServiceManger serviceManger,*/ HttpClient _httpClient,IUnitOfWork unitOfWork,IMapper mapper) : Controller
+    public class StudentController(IExamService examService, HttpClient _httpClient,IUnitOfWork unitOfWork,IMapper mapper) : Controller
     {
         [Authorize(Roles = "Student")]
         public async Task<IActionResult> Index()

@@ -21,13 +21,11 @@ namespace Presentation_Layer.Controllers
     public class ExamsController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
-      /*  private readonly IServiceManger _serviceManger;*/
         private readonly IUnitOfWork _unitOfWork;
 
-        public ExamsController(UserManager<ApplicationUser> userManager, /*IServiceManger serviceManger,*/ IUnitOfWork unitOfWork)
+        public ExamsController(UserManager<ApplicationUser> userManager, IUnitOfWork unitOfWork)
         {
             _userManager = userManager;
-        /*    _serviceManger = serviceManger;*/
             _unitOfWork = unitOfWork;
         }
 

@@ -58,7 +58,7 @@
     }
 
     <div class="mt-3">
-        <a asp-controller="Course" asp-action="Index" asp-route-id="@Model.FirstOrDefault()?.CourseId" class="btn btn-outline-secondary">
+        <a asp-controller="SuperVisor" asp-action="GetAllCourses" asp-route-userEmail="" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Back to Course
         </a>
     </div>

@@ -17,6 +17,7 @@ namespace Presentation_Layer.Controllers
 
         public async Task<IActionResult> GetAllCourses(string userEmail)
         {
+            
             var supervisor=await unitOfWork.SuperVisorRepository.GetSuperVisorWithEmail(userEmail);
             if (supervisor == null) return NotFound();
             
@@ -54,6 +55,35 @@ namespace Presentation_Layer.Controllers
                     TotalGrade = exam.TotalGrade ?? 0,
                     Questions = new List<QuestionViewModel>()
                 };
+                foreach (var question in exam.Questions)
+                {
+                    var questionVM = new QuestionViewModel
+                    {
+                        Id = question.Id,
+                        QuestionText = question.QuestionText,
+                        Choices = new List<ChoiceViewModel>(),
+                        CorrectChoiceIndex = 0
+                    };
+
+                    int choiceIndex = 0;
+                    foreach (var choice in question.Choices)
+                    {
+                        questionVM.Choices.Add(new ChoiceViewModel
+                        {
+                            Id = choice.Id,
+                            ChoiceText = choice.ChoiceText
+                        });
+
+                        // Set the correct choice index
+                        if (choice.ChoiceText == question.Answer)
+                        {
+                            questionVM.CorrectChoiceIndex = choiceIndex;
+                        }
+                        choiceIndex++;
+                    }
+
+                    viewModel.Questions.Add(questionVM);
+                }
                 return View(viewModel);
 
             }
