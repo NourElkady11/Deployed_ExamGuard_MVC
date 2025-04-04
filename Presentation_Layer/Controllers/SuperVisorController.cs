@@ -17,7 +17,8 @@ namespace Presentation_Layer.Controllers
 
         public async Task<IActionResult> GetAllCourses(string userEmail)
         {
-            
+            ViewBag.UserEmail = userEmail;
+
             var supervisor=await unitOfWork.SuperVisorRepository.GetSuperVisorWithEmail(userEmail);
             if (supervisor == null) return NotFound();
             

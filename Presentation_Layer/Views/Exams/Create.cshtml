@@ -11,7 +11,6 @@
     <form asp-action="Create" id="examForm">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <input type="hidden" asp-for="CourseId" />
-
         <div class="row mb-4">
             <div class="col-md-6">
                 <div class="form-group">
@@ -45,7 +44,6 @@
                 </div>
             </div>
         </div>
-
         <h3>Questions</h3>
         <div id="questions-container">
             @for (int i = 0; i < Model.Questions.Count; i++)
@@ -65,7 +63,6 @@
                             <label class="control-label">Choices</label>
                             <small class="text-muted d-block mb-2">Select the radio button next to the correct answer.</small>
                         </div>
-
                         @for (int j = 0; j < Model.Questions[i].Choices.Count; j++)
                         {
                             <div class="input-group mb-2">
@@ -83,7 +80,6 @@
                 </div>
             }
         </div>
-
         <div class="mb-4">
             <button type="button" id="add-question" class="btn btn-success">Add Another Question</button>
         </div>

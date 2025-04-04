@@ -35,12 +35,12 @@ namespace Presentation_Layer
             builder.Services.AddAutoMapper(typeof(Program).Assembly);
             builder.Services.AddAutoMapper(typeof(Reference).Assembly);
  
-            builder.Services.AddSession(); // Add session services
-            builder.Services.AddHttpContextAccessor(); // Allow access to HttpContext.Session
+            builder.Services.AddSession(); 
+            builder.Services.AddHttpContextAccessor(); 
 
             builder.Services.AddHttpClient("MyHttpClient", client =>
             {
-                client.Timeout = TimeSpan.FromSeconds(30);  // Set timeout here
+                client.Timeout = TimeSpan.FromSeconds(60);  
             });
 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -49,7 +49,6 @@ namespace Presentation_Layer
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<DataIdentityContext>().AddDefaultTokenProviders();
 
-            /*    builder.Services.AddScoped<IExamService, ExamService>();*/
 
             //AddDefaultTokenProviders==> is for providing the tokens for ForgetPassword and add the defult asccces denied path in the authorization proccess
             /*builder.Services.AddAuthentication(option =>
@@ -81,10 +80,8 @@ namespace Presentation_Layer
             {
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
                 options.SlidingExpiration = true;
-                options.Cookie.HttpOnly = true; // ✅ This is fine, keep it.
-                options.Cookie.SecurePolicy = CookieSecurePolicy.None; // ⚠️ Change to `None` for testing if needed.
-
-                // Ensure correct authentication paths
+                options.Cookie.HttpOnly = true; 
+                options.Cookie.SecurePolicy = CookieSecurePolicy.None; 
                 options.LoginPath = "/Account/Login";
                 options.AccessDeniedPath = "/Account/AccessDenied";
 

@@ -73,60 +73,70 @@ namespace Presentation_Layer.Controllers
         {
             if (ModelState.IsValid)
             {
-                var course = await _unitOfWork.CoursesRepo.GetAsync(examViewModel.CourseId);
-                if (course == null)
+                try
                 {
-                    return NotFound();
-                }
-
-                // Create the Exam entity
-                var exam = new Exam
-                {
-                    Subject = examViewModel.Subject,
-                    Code = examViewModel.Code,
-                    Duration = TimeOnly.FromTimeSpan(TimeSpan.FromMinutes(examViewModel.DurationMinutes)),
-                    Date = DateOnly.FromDateTime(examViewModel.Date),
-                    CourseId = examViewModel.CourseId,
-                    TotalGrade = examViewModel.Questions.Count // Each question is worth 1 point
-                };
-
-                // Create Questions and Choices
-                foreach (var questionVM in examViewModel.Questions)
-                {
-                    var question = new Question
+                    var course = await _unitOfWork.CoursesRepo.GetAsync(examViewModel.CourseId);
+                    if (course == null)
                     {
-                        QuestionText = questionVM.QuestionText,
-                        Answer = questionVM.Choices[questionVM.CorrectChoiceIndex].ChoiceText
+                        return NotFound();
+                    }
+                    var exam = new Exam
+                    {
+                        Subject = examViewModel.Subject,
+                        Code = examViewModel.Code,
+                        Duration = TimeOnly.FromTimeSpan(TimeSpan.FromMinutes(examViewModel.DurationMinutes)),
+                        Date = DateOnly.FromDateTime(examViewModel.Date),
+                        CourseId = examViewModel.CourseId,
+                        TotalGrade = examViewModel.Questions.Count
                     };
 
-                    foreach (var choiceVM in questionVM.Choices)
+
+                    foreach (var questionVM in examViewModel.Questions)
                     {
-                        var choice = new Choice
+                        var question = new Question
                         {
-                            ChoiceText = choiceVM.ChoiceText,
-                            Question = question
+                            QuestionText = questionVM.QuestionText,
+                            Answer = questionVM.Choices[questionVM.CorrectChoiceIndex].ChoiceText
                         };
-                        question.Choices.Add(choice);
+
+                        foreach (var choiceVM in questionVM.Choices)
+                        {
+                            var choice = new Choice
+                            {
+                                ChoiceText = choiceVM.ChoiceText,
+                                Question = question
+                            };
+                            question.Choices.Add(choice);
+                        }
+
+                        exam.Questions.Add(question);
                     }
 
-                    exam.Questions.Add(question);
+                    await _unitOfWork.ExamRepository.CreateAsync(exam);
+                    await _unitOfWork.SaveChangesAsync();
+
+                    return RedirectToAction("Index", "Course");
                 }
+                catch (Exception ex) {
 
-                await _unitOfWork.ExamRepository.CreateAsync(exam);
-                await _unitOfWork.SaveChangesAsync();
-
-                return RedirectToAction("Index", "Course");
+                    if (!await ExamExists(examViewModel.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", ex.Message);
+                    }
+                    return View(examViewModel);
+                }
+                
             }
             else
             {
-               
+                ModelState.AddModelError("", "An error occurred while updating the exam. Please try again.");
+                return View(examViewModel);
+
             }
-
-            // If we got to here, something failed, redisplay form
-            var courseForRedisplay = await _unitOfWork.CoursesRepo.GetAsync(examViewModel.CourseId);
-            examViewModel.CourseName = courseForRedisplay?.Name;
-
-            return View(examViewModel);
         }
 
         public async Task<IActionResult> Edit(int id)
@@ -150,7 +160,6 @@ namespace Presentation_Layer.Controllers
                 Questions = new List<QuestionViewModel>()
             };
 
-            // Add questions to the view model
             foreach (var question in exam.Questions)
             {
                 var questionVM = new QuestionViewModel
@@ -170,7 +179,6 @@ namespace Presentation_Layer.Controllers
                         ChoiceText = choice.ChoiceText
                     });
 
-                    // Set the correct choice index
                     if (choice.ChoiceText == question.Answer)
                     {
                         questionVM.CorrectChoiceIndex = choiceIndex;
@@ -202,13 +210,11 @@ namespace Presentation_Layer.Controllers
                     {
                         return NotFound();
                     }
-
-                    // Update exam properties
                     exam.Subject = examViewModel.Subject;
                     exam.Code = examViewModel.Code;
                     exam.Duration = TimeOnly.FromTimeSpan(TimeSpan.FromMinutes(examViewModel.DurationMinutes));
                     exam.Date = DateOnly.FromDateTime(examViewModel.Date);
-                    exam.TotalGrade = examViewModel.Questions.Count; // Update total grade based on question count
+                    exam.TotalGrade = examViewModel.Questions.Count; 
 
                   
                     foreach (var question in exam.Questions.ToList())
@@ -245,7 +251,7 @@ namespace Presentation_Layer.Controllers
                     _unitOfWork.ExamRepository.Update(exam);
                     await _unitOfWork.SaveChangesAsync();
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (Exception ex)
                 {
                     if (!await ExamExists(examViewModel.Id))
                     {
@@ -253,16 +259,12 @@ namespace Presentation_Layer.Controllers
                     }
                     else
                     {
-                        throw;
+                        ModelState.AddModelError("",ex.Message);
                     }
                 }
-                return RedirectToAction("Index", "Course");
+                return View(examViewModel);
             }
-
-            // If we got here, something failed, redisplay form
-            var course = await _unitOfWork.CoursesRepo.GetAsync(examViewModel.CourseId);
-            examViewModel.CourseName = course?.Name;
-
+            ModelState.AddModelError("", "An error occurred while updating the exam. Please try again.");
             return View(examViewModel);
         }
 
