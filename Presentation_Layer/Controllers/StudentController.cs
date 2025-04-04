@@ -11,7 +11,7 @@ using System.Net.Http;
 
 namespace Presentation_Layer.Controllers
 {
-    public class StudentController(IExamService examService, HttpClient _httpClient,IUnitOfWork unitOfWork,IMapper mapper) : Controller
+    public class StudentController(HttpClient _httpClient,IUnitOfWork unitOfWork,IMapper mapper) : Controller
     {
         [Authorize(Roles = "Student")]
         public async Task<IActionResult> Index()
@@ -42,7 +42,7 @@ namespace Presentation_Layer.Controllers
         {
             try
             {
-                // Redirect to GoToExam action with the examId
+              
                 return RedirectToAction("GoToExam", new { examId = examId });
             }
             catch (Exception ex)
@@ -54,9 +54,9 @@ namespace Presentation_Layer.Controllers
 
         public async Task<IActionResult> GoToExam(int examId)
         {
-            // Render the GoToExam page immediately
+          
             ViewData["ExamId"] = examId;
-            return View(examId); // Pass the examId to the view
+            return View(examId); 
         }
 
         [HttpGet]
@@ -96,11 +96,7 @@ namespace Presentation_Layer.Controllers
         {
             try
             {
-                // Stop the exam monitoring first
                 await StopExam(examId);
-
-                // Save the exam answers
-              /*  await examService.SubmitExam(examId, examData);*/
 
                 return Json(new { success = true, message = "Exam submitted successfully" });
             }
