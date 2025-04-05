@@ -16,47 +16,23 @@ namespace Presentation_Layer.Controllers
         [Authorize(Roles = "Student")]
         public async Task<IActionResult> Index()
         {
-            var courses = await unitOfWork.CoursesRepo.GetCourseWithSuperVisorssAsync();
+            var courses = await unitOfWork.CoursesRepo.GetCourseWithExamssAsync();
             return View(courses);
-
         }
 
-        public async Task<IActionResult> GetAllGrades()
+        public async Task<IActionResult> GetCourseExams(int courseid)
         {
-            return View();
-        }
-
-        public async Task<IActionResult> Profile()
-        {
-            return View();
-        }
-
-        public async Task<IActionResult> EditProfile()
-        {
-            return View();
-        }
-
-
-        [HttpPost]
-        public async Task<IActionResult> StartExam(int examId)
-        {
-            try
-            {
-              
-                return RedirectToAction("GoToExam", new { examId = examId });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Error: {ex.Message}");
-            }
+            var exams = await unitOfWork.ExamRepository.GetCourseExamsAsync(courseid);
+            ViewBag.mycourseId = courseid;
+            return View(exams);
         }
 
 
         public async Task<IActionResult> GoToExam(int examId)
         {
-          
+            var exam = await unitOfWork.ExamRepository.GetExamWithQuestionsAndChoicesAsync(examId);
             ViewData["ExamId"] = examId;
-            return View(examId); 
+            return View(exam); 
         }
 
         [HttpGet]
@@ -104,6 +80,8 @@ namespace Presentation_Layer.Controllers
             {
                 return StatusCode(500, $"Error submitting exam: {ex.Message}");
             }
+
+
         }
 
         [HttpGet]
@@ -125,6 +103,13 @@ namespace Presentation_Layer.Controllers
             {
                 return StatusCode(500, $"Error: {ex.Message}");
             }
+
+           
+        }
+
+        public async Task<IActionResult> ExamComplete()
+        {
+            return View();
         }
 
         [HttpPost]
@@ -146,5 +131,24 @@ namespace Presentation_Layer.Controllers
                 return StatusCode(500, "Error processing detection");
             }
         }
+
+
+        public async Task<IActionResult> GetAllGrades()
+        {
+            return View();
+
+        }
+
+
+        public async Task<IActionResult> Profile()
+        {
+            return View();
+        }
+
+        public async Task<IActionResult> EditProfile()
+        {
+            return View();
+        }
+
     }
 }

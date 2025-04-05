@@ -29,7 +29,7 @@ namespace Presentation_Layer.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var courses = await _unitOfWork.CoursesRepo.GetCourseWithSuperVisorssAsync();
+            var courses = await _unitOfWork.CoursesRepo.GetCourseWithExamssAsync();
             return View(courses);
         }
 

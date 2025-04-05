@@ -11,7 +11,6 @@ namespace DataAccess_Layer.Repositories
         public Task<Course> GetCourseWithExamAsync(int id);
         public Task<List<Course>> GetCourseWithExamssAsync();
         public Task<Course> GetCourseWithNameAsync(string name);
-        public Task <List<Course>> GetCourseWithSuperVisorssAsync();
         public Task<List<Course>> GetSuperVisorCourses(int id);
     }
 }

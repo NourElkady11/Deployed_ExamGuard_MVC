@@ -24,5 +24,7 @@ namespace Data.Models
 
         public ICollection<CourseStudent>? CourseStudents { get; set; } = new List<CourseStudent>();
 
+
+
     }
 }

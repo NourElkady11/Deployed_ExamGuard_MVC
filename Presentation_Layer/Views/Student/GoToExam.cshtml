@@ -1,6 +1,8 @@
-﻿@{
+﻿@model DataAccess_Layer.Models.Exam
+@{
     ViewData["Title"] = "Exam";
     var examId = ViewData["ExamId"];
+    var exam = Model;
 }
 <head>
     <link rel="stylesheet" href="~/css/exam.css" asp-append-version="true" />
@@ -8,9 +10,9 @@
 
 <div class="exam-container">
     <div class="exam-header">
-        <h2 class="exam-title">Final Exam: Data Structures and Algorithms</h2>
+        <h2 class="exam-title">@exam.Subject: @exam.Code</h2>
         <div class="exam-info">
-            <div id="timeRemaining" class="timer">Time Remaining: 60:00</div>
+            <div id="timeRemaining" class="timer">Time Remaining: @exam.Duration.ToString("hh\\:mm")</div>
             <div class="student-info">
                 Student: @User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value
             </div>
@@ -18,66 +20,34 @@
     </div>
     <div class="exam-content">
         <form id="examForm" class="question-container">
-            <div class="question-block">
-                <h3>Question 1 (20 points)</h3>
-                <p>What is the time complexity of QuickSort in the worst case scenario?</p>
-                <div class="options">
-                    <div class="option">
-                        <input type="radio" id="q1_a" name="q1" value="a" required>
-                        <label for="q1_a">O(n)</label>
-                    </div>
-                    <div class="option">
-                        <input type="radio" id="q1_b" name="q1" value="b">
-                        <label for="q1_b">O(n log n)</label>
-                    </div>
-                    <div class="option">
-                        <input type="radio" id="q1_c" name="q1" value="c">
-                        <label for="q1_c">O(n²)</label>
-                    </div>
-                    <div class="option">
-                        <input type="radio" id="q1_d" name="q1" value="d">
-                        <label for="q1_d">O(log n)</label>
-                    </div>
-                </div>
-            </div>
-            <div class="question-block">
-                <h3>Question 2 (30 points)</h3>
-                <p>Explain how a hash table handles collisions using the chaining method.</p>
-                <textarea name="q2" rows="4" required placeholder="Enter your answer here..."></textarea>
-            </div>
-            <div class="question-block">
-                <h3>Question 3 (25 points)</h3>
-                <p>Which of the following data structures would be most efficient for implementing a cache?</p>
-                <div class="options">
-                    <div class="option">
-                        <input type="radio" id="q3_a" name="q3" value="a" required>
-                        <label for="q3_a">Array</label>
-                    </div>
-                    <div class="option">
-                        <input type="radio" id="q3_b" name="q3" value="b">
-                        <label for="q3_b">Linked List</label>
-                    </div>
-                    <div class="option">
-                        <input type="radio" id="q3_c" name="q3" value="c">
-                        <label for="q3_c">Hash Table</label>
-                    </div>
-                    <div class="option">
-                        <input type="radio" id="q3_d" name="q3" value="d">
-                        <label for="q3_d">Binary Search Tree</label>
-                    </div>
-                </div>
-            </div>
+            @{
+                int questionCount = 0;
 
-            <div class="question-block">
-                <h3>Question 4 (25 points)</h3>
-                <p>Write a short code snippet in any programming language to implement a stack using an array.</p>
-                <textarea name="q4" rows="6" required
-                          placeholder="Write your code here..."></textarea>
-            </div>
+                foreach (var question in exam.Questions)
+                {
+                    questionCount++;
+                    int pointsPerQuestion = exam.Questions.Count;
 
-            <div class="exam-controls">
+                    <div class="question-block">
+                        <h3>Question @questionCount (@pointsPerQuestion points)</h3>
+                        <p>@question.QuestionText</p>
+
+                        <div class="options">
+                            @foreach (var choice in question.Choices)
+                            {
+                                string choiceId = $"q{question.Id}_{choice.Id}";
+                                <div class="option">
+                                    <input type="radio" id="@choiceId" name="q@(question.Id)" value="@choice.Id" required>
+                                    <label for="@choiceId">@choice.ChoiceText</label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+
+            <div class="exam-controls d-flex justify-content-end mt-4">
                 <button type="submit" id="submitExam" class="btn btn-primary">Submit Exam</button>
-                <button type="button" id="saveProgress" class="btn btn-secondary">Save Progress</button>
             </div>
         </form>
     </div>
@@ -105,10 +75,10 @@
 
 <script>
     let isExamActive = true;
-    let timeLeft = 10 * 60; // 60 minutes in seconds
+    let timeLeft = @(exam.Duration.Hour * 60 * 60 + exam.Duration.Minute * 60); // Convert duration to seconds
 
     window.onload = function () {
-        var examId = @Model;
+        var examId = @examId;
         startDetectionPolling(examId);
         startExamTimer();
         setupFormHandling();
@@ -183,12 +153,17 @@
     async function submitExam(isTimeUp) {
         if (!isExamActive) return;
 
+        isExamActive = false;
+        await stopExam();
+
         const form = document.getElementById('examForm');
         const formData = new FormData(form);
         const examData = Object.fromEntries(formData.entries());
 
+        examData.examId = @examId;
+
         try {
-            const response = await fetch(`/Student/SubmitExam?examId=${examId}`, {
+            const response = await fetch(`/Student/SubmitExam`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -197,15 +172,9 @@
             });
 
             if (response.ok) {
-                isExamActive = false;
-                await stopExam();
-
                 if (isTimeUp) {
                     alert('Time is up! Your exam has been submitted.');
-                } else {
-                    alert('Exam submitted successfully!');
                 }
-
                 window.location.href = '/Student/ExamComplete';
             } else {
                 alert('Failed to submit exam. Please try again.');
@@ -216,27 +185,6 @@
         }
     }
 
-    async function saveExamProgress() {
-        const form = document.getElementById('examForm');
-        const formData = new FormData(form);
-        const examData = Object.fromEntries(formData.entries());
-
-        try {
-            const response = await fetch(`/Student/SaveExamProgress?examId=${examId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(examData)
-            });
-
-            if (!response.ok) {
-                console.error('Failed to save progress');
-            }
-        } catch (error) {
-            console.error('Error saving progress:', error);
-        }
-    }
 
     function showSaveNotification() {
         const alertDiv = document.createElement('div');
@@ -294,7 +242,7 @@
     async function stopExam() {
         isExamActive = false;
         try {
-            await fetch(`/Student/StopExam?examId=${examId}`);
+            await fetch(`/Student/StopExam?examId=${@examId}`);
         } catch (error) {
             console.error("Error stopping exam:", error);
         }
