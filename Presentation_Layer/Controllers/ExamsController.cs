@@ -91,7 +91,6 @@ namespace Presentation_Layer.Controllers
                      
                     };
 
-
                     foreach (var questionVM in examViewModel.Questions)
                     {
                         var question = new Question

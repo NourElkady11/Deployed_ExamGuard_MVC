@@ -6,7 +6,9 @@ namespace Presentation_Layer.ViewModels
     public class ExamViewModel
     {
         public int Id { get; set; }
+        [Required]
         public string Subject { get; set; }
+        [Required(ErrorMessage = "Code is required")]
         public string Code { get; set; }
         public string ? Status { get; set; }
         [Required(ErrorMessage = "Duration is required")]
