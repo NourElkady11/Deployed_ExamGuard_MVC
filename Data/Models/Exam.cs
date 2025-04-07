@@ -27,5 +27,7 @@ namespace DataAccess_Layer.Models
 
         public int? TotalGrade { get; set; }
 
+        public ICollection<StudentExam>? studentExams { get; set; } = new List<StudentExam>();
+
     }
 }

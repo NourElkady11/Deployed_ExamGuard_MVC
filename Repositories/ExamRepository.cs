@@ -23,6 +23,7 @@ namespace Repositories
         public async Task<Exam> GetExamWithQuestionsAndChoicesAsync(int id)
         {
             return await _context.Exams
+                 .Include(e => e.studentExams)
                 .Include(e => e.Course)
                 .Include(e => e.Questions)
                     .ThenInclude(q => q.Choices)
@@ -32,6 +33,7 @@ namespace Repositories
         public async Task<List<Exam>> GetCourseExamsAsync(int courseid)
         {
             return await _context.Exams
+                .Include(e=>e.studentExams)
                 .Include(e => e.Course)
                 .Include(e => e.Questions)
                     .ThenInclude(q => q.Choices)

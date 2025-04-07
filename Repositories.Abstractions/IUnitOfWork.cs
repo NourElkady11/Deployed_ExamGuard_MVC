@@ -13,6 +13,7 @@ namespace DataAccess_Layer.Repositories
         public ICourseRepositorys CoursesRepo { get; }
         public ISuperVisorRepository SuperVisorRepository { get; }
         public IExamRepository ExamRepository { get; }
+        public IStudentExamRepository StudentExamRepository { get; }
         public Task <int> SaveChangesAsync();
     }
 }

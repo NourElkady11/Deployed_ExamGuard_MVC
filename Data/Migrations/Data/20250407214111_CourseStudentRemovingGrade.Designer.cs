@@ -4,6 +4,7 @@ using Data.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations.Data
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20250407214111_CourseStudentRemovingGrade")]
+    partial class CourseStudentRemovingGrade
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -144,27 +147,6 @@ namespace Data.Migrations.Data
                     b.ToTable("Students");
                 });
 
-            modelBuilder.Entity("Data.Models.StudentExam", b =>
-                {
-                    b.Property<int>("StudentId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ExamId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Grade")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Status")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("StudentId", "ExamId");
-
-                    b.HasIndex("ExamId");
-
-                    b.ToTable("StudentExams");
-                });
-
             modelBuilder.Entity("Data.Models.SuperVisor", b =>
                 {
                     b.Property<int>("Id")
@@ -272,25 +254,6 @@ namespace Data.Migrations.Data
                     b.Navigation("Exam");
                 });
 
-            modelBuilder.Entity("Data.Models.StudentExam", b =>
-                {
-                    b.HasOne("DataAccess_Layer.Models.Exam", "exam")
-                        .WithMany("studentExams")
-                        .HasForeignKey("ExamId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Data.Models.Student", "student")
-                        .WithMany("studentExams")
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("exam");
-
-                    b.Navigation("student");
-                });
-
             modelBuilder.Entity("DataAccess_Layer.Models.Exam", b =>
                 {
                     b.HasOne("Data.Models.Course", "Course")
@@ -315,8 +278,6 @@ namespace Data.Migrations.Data
             modelBuilder.Entity("Data.Models.Student", b =>
                 {
                     b.Navigation("CourseStudents");
-
-                    b.Navigation("studentExams");
                 });
 
             modelBuilder.Entity("Data.Models.SuperVisor", b =>
@@ -327,8 +288,6 @@ namespace Data.Migrations.Data
             modelBuilder.Entity("DataAccess_Layer.Models.Exam", b =>
                 {
                     b.Navigation("Questions");
-
-                    b.Navigation("studentExams");
                 });
 #pragma warning restore 612, 618
         }

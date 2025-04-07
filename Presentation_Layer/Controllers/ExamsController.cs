@@ -87,7 +87,8 @@ namespace Presentation_Layer.Controllers
                         Duration = TimeOnly.FromTimeSpan(TimeSpan.FromMinutes(examViewModel.DurationMinutes)),
                         Date = DateOnly.FromDateTime(examViewModel.Date),
                         CourseId = examViewModel.CourseId,
-                        TotalGrade = examViewModel.Questions.Count
+                        TotalGrade = examViewModel.Questions.Count,
+                     
                     };
 
 
