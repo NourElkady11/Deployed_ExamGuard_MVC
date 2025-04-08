@@ -23,7 +23,15 @@ namespace Presentation_Layer.Controllers
         public async Task<IActionResult> GetCourseExams(int courseid)
         {
             var exams = await unitOfWork.ExamRepository.GetCourseExamsAsync(courseid);
-            ViewBag.mycourseId = courseid;
+            var email=User.FindFirst(System.Security.Claims.ClaimTypes.Email);
+            var student = await unitOfWork.StudentsRepo.GetStudentWithEmail(email.Value);
+            var userId = student.Id;
+         /*   var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);*/
+
+            var studentExams = await unitOfWork.StudentExamRepository.GetStudentExamsAsync(userId);
+            ViewBag.StudentExams = studentExams.ToDictionary(se => se.ExamId, se => se);
+            ViewBag.MyCourseId = courseid;
+
             return View(exams);
         }
 
@@ -34,6 +42,35 @@ namespace Presentation_Layer.Controllers
             ViewData["ExamId"] = examId;
             return View(exam); 
         }
+
+
+        public async Task<IActionResult> ReviewExam(int examId)
+        {
+            var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email);
+            var student = await unitOfWork.StudentsRepo.GetStudentWithEmail(email.Value);
+            var userId = student.Id;
+         /*   var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);*/
+            var exam = await unitOfWork.ExamRepository.GetExamWithQuestionsAndChoicesAsync(examId);
+            var studentExam = await unitOfWork.StudentExamRepository.GetAsync(userId, examId);
+
+            if (exam == null || studentExam == null || studentExam.Status != "Completed")
+            {
+                return NotFound();
+            }
+
+            // Load student answers
+            var studentAnswers = await unitOfWork.StudentAnswerRepository.GetStudentExamAnswersAsync(userId, examId);
+
+            var reviewViewModel = new ExamReviewViewModel
+            {
+                Exam = exam,
+                StudentExam = studentExam,
+                StudentAnswers = studentAnswers.ToDictionary(sa => sa.QuestionId, sa => sa.ChoiceId)
+            };
+
+            return View(reviewViewModel);
+        }
+
 
         [HttpGet]
         public async Task<IActionResult> GetDetectionResults(int examId)
@@ -72,16 +109,90 @@ namespace Presentation_Layer.Controllers
         {
             try
             {
+                if (examData == null)
+                {
+                    return BadRequest("No exam data provided");
+                }
+
                 await StopExam(examId);
 
-                return Json(new { success = true, message = "Exam submitted successfully" });
+                // Get the current user ID
+                var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email);
+                var student = await unitOfWork.StudentsRepo.GetStudentWithEmail(email.Value);
+                var userId = student.Id;
+                /* var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);*/
+
+                // Get the exam with questions and choices
+                var exam = await unitOfWork.ExamRepository.GetExamWithQuestionsAndChoicesAsync(examId);
+                if (exam == null)
+                    return StatusCode(500, "Exam not found");
+
+                // Calculate grade
+                int correctAnswers = 0;
+                int totalQuestions = exam.Questions.Count;
+
+
+/*                await unitOfWork.StudentAnswerRepository.DeleteStudentExamAnswersAsync(userId, examId);
+*/
+
+                // Process each question and save the student's answers
+                foreach (var question in exam.Questions)
+                {
+                    string questionKey = $"q{question.Id}";
+                    if (examData.ContainsKey(questionKey))
+                    {
+                        int choiceId = int.Parse(examData[questionKey]);
+                        var selectedChoice = question.Choices.FirstOrDefault(c => c.Id == choiceId);
+
+                        // Save the student's answer
+                        var studentAnswer = new StudentAnswer
+                        {
+                            StudentId = userId,
+                            ExamId = examId,
+                            QuestionId = question.Id,
+                            ChoiceId = choiceId
+                        };
+
+                        await unitOfWork.StudentAnswerRepository.CreateAsync(studentAnswer);
+
+                        if (selectedChoice != null && selectedChoice.ChoiceText == question.Answer)
+                        {
+                            correctAnswers++;
+                        }
+                    }
+                }
+
+                // Calculate percentage grade
+                int grade = (totalQuestions > 0) ? (correctAnswers * 100) / totalQuestions : 0;
+
+                // Create or update StudentExam record
+                var studentExam = await unitOfWork.StudentExamRepository.GetAsync(userId, examId);
+                if (studentExam == null)
+                {
+                    studentExam = new StudentExam
+                    {
+                        StudentId = userId,
+                        ExamId = examId,
+                        Grade = grade,
+                        Status = "Completed"
+                    };
+                    await unitOfWork.StudentExamRepository.CreateAsync(studentExam);
+                }
+                else
+                {
+                    studentExam.Grade = grade;
+                    studentExam.Status = "Completed";
+                    unitOfWork.StudentExamRepository.Update(studentExam);
+                }
+
+                await unitOfWork.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Exam submitted successfully", grade = grade });
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Error submitting exam: {ex.Message}");
             }
-
-
         }
 
         [HttpGet]

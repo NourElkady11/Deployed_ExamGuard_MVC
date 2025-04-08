@@ -10,6 +10,7 @@ namespace Repositories.Abstractions
 {
     public interface IStudentExamRepository:IGenaricRepository<StudentExam>
     {
-
+        Task<StudentExam> GetAsync(int studentId, int examId);
+        Task<IEnumerable<StudentExam>> GetStudentExamsAsync(int studentId);
     }
 }

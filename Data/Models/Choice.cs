@@ -13,6 +13,8 @@ namespace Data.Models
 
         public Question? Question { get; set; }
         public int? QuestionId { get; set; }
-   
+
+        public ICollection<StudentAnswer> StudentAnswers { get; set; } = new List<StudentAnswer>();
+
     }
 }

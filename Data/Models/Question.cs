@@ -17,5 +17,7 @@ namespace Data.Models
         public int? ExamId { get; set; }
 
         public ICollection<Choice> Choices { get; set; } = new List<Choice>();
+
+        public ICollection<StudentAnswer>? StudentAnswers { get; set; } = new List<StudentAnswer>();
     }
 }

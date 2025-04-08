@@ -29,5 +29,7 @@ namespace DataAccess_Layer.Models
 
         public ICollection<StudentExam>? studentExams { get; set; } = new List<StudentExam>();
 
+        public ICollection<StudentAnswer>? StudentAnswers { get; set; } = new List<StudentAnswer>();
+
     }
 }

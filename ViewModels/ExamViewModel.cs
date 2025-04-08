@@ -11,6 +11,7 @@ namespace Presentation_Layer.ViewModels
         [Required(ErrorMessage = "Code is required")]
         public string Code { get; set; }
         public string ? Status { get; set; }
+        public int ? Grade { get; set; }
         [Required(ErrorMessage = "Duration is required")]
         [Display(Name = "Duration (minutes)")]
         public int DurationMinutes { get; set; }

@@ -35,13 +35,40 @@ namespace Data.Data
                 .HasForeignKey(cs => cs.CourseId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+             //////////////////////////////////////////////////////////////////////////////
+
+            modelBuilder.Entity<StudentAnswer>()
+                .HasOne(sa => sa.Student)
+                .WithMany(s => s.StudentAnswers)
+                .HasForeignKey(sa => sa.StudentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<StudentAnswer>()
+                .HasOne(sa => sa.Exam)
+                .WithMany(e => e.StudentAnswers)
+                .HasForeignKey(sa => sa.ExamId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<StudentAnswer>()
+                .HasOne(sa => sa.Question)
+                .WithMany(q => q.StudentAnswers)
+                .HasForeignKey(sa => sa.QuestionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<StudentAnswer>()
+                .HasOne(sa => sa.Choice)
+                .WithMany(c => c.StudentAnswers)
+                .HasForeignKey(sa => sa.ChoiceId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            //////////////////////////////////////////////////////////////////////////////////////
+
             modelBuilder.Entity<Course>().HasMany(e => e.Exams).WithOne(c => c.Course).HasForeignKey(e => e.CourseId);
 
             modelBuilder.Entity<SuperVisor>().HasMany(s => s.courses).WithOne(s => s.superVisor).HasForeignKey(s => s.SuperVisorId);
 
             modelBuilder.Entity<Exam>().HasMany(q => q.Questions).WithOne(e => e.Exam).HasForeignKey(q => q.ExamId);
             modelBuilder.Entity<Question>().HasMany(c => c.Choices).WithOne(q => q.Question).HasForeignKey(c => c.QuestionId);
-            //Create the relation
 
             modelBuilder.Entity<StudentExam>()
                 .HasKey(se => new { se.StudentId, se.ExamId });
@@ -53,12 +80,13 @@ namespace Data.Data
 
         }
 
-        public DbSet<Student> Students { get; set; }
+        public DbSet<Exam> Exams { get; set; }
         public DbSet<Course> Courses { get; set; }
+        public DbSet<Student> Students { get; set; }
         public DbSet<SuperVisor> SuperVisors { get; set; }
         public DbSet<StudentExam> StudentExams { get; set; }
+        public DbSet<StudentAnswer> studentAnswers { get; set; }
         public DbSet<CourseStudent> CourseStudents { get; set; }
-        public DbSet<Exam> Exams { get; set; }
 
 
     }

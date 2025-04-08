@@ -157,7 +157,8 @@ namespace Presentation_Layer.Controllers
                 CourseId = exam.CourseId ?? 0,
                 CourseName = exam.Course?.Name,
                 TotalGrade = exam.TotalGrade ?? 0,
-                Questions = new List<QuestionViewModel>()
+                Questions = new List<QuestionViewModel>(),  
+
             };
 
             foreach (var question in exam.Questions)

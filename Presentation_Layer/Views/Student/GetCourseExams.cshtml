@@ -1,17 +1,18 @@
 ﻿@model IEnumerable<DataAccess_Layer.Models.Exam>
-
 @{
     ViewData["Title"] = "Course Exams";
+    var studentExams = ViewBag.StudentExams as Dictionary<int, Data.Models.StudentExam>;
 }
-
 <div class="container mt-4">
     <h2>Exams for Course</h2>
-
     @if (Model.Any())
     {
         <div class="row">
             @foreach (var exam in Model)
             {
+                bool examCompleted = studentExams != null && studentExams.ContainsKey(exam.Id) &&
+                studentExams[exam.Id].Status == "Completed";
+
                 <div class="col-lg-4 col-md-6 mb-4">
                     <div class="card h-100 shadow-sm">
                         <div class="card-header bg-primary text-white">
@@ -33,16 +34,31 @@
                             <div class="mb-2">
                                 <strong>Total Grade:</strong> @exam.TotalGrade
                             </div>
+                            @if (examCompleted)
+                            {
+                                <div class="mb-2">
+                                    <strong>Your Grade:</strong>
+                                    <span class="badge @(studentExams[exam.Id].Grade >= 50 ? "bg-success" : "bg-danger")">
+                                        @studentExams[exam.Id].Grade%
+                                    </span>
+                                </div>
+                            }
                         </div>
                         <div class="card-footer bg-white border-top-0">
-
-                            <div class="card-footer bg-white border-top-0">
+                            @if (examCompleted)
+                            {
+                                <a asp-action="ReviewExam" asp-controller="Student" asp-route-examId="@exam.Id"
+                                   class="btn btn-secondary w-100">
+                                    <i class="bi bi-eye"></i> Review Exam
+                                </a>
+                            }
+                            else
+                            {
                                 <a asp-action="GoToExam" asp-controller="Student" asp-route-examId="@exam.Id"
                                    class="btn btn-success w-100">
                                     <i class="bi bi-question-circle"></i> Start Exam
                                 </a>
-                            </div>
-
+                            }
                         </div>
                     </div>
                 </div>

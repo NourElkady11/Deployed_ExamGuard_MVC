@@ -137,17 +137,7 @@
             submitExam(false);
         });
 
-        // Auto-save every minute
-        setInterval(() => {
-            if (isExamActive) {
-                saveExamProgress();
-            }
-        }, 60000);
-
-        document.getElementById('saveProgress').addEventListener('click', () => {
-            saveExamProgress();
-            showSaveNotification();
-        });
+      
     }
 
     async function submitExam(isTimeUp) {
@@ -160,10 +150,8 @@
         const formData = new FormData(form);
         const examData = Object.fromEntries(formData.entries());
 
-        examData.examId = @examId;
-
         try {
-            const response = await fetch(`/Student/SubmitExam`, {
+            const response = await fetch(`/Student/SubmitExam?examId=@examId`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
