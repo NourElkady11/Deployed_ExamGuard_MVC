@@ -32,7 +32,7 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label asp-for="Date" class="control-label"></label>
-                    <input asp-for="Date" class="form-control" type="date" />
+                    <input asp-for="Date" class="form-control" type="date" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
                     <span asp-validation-for="Date" class="text-danger"></span>
                 </div>
             </div>
@@ -63,18 +63,36 @@
                             <label class="control-label">Choices</label>
                             <small class="text-muted d-block mb-2">Select the radio button next to the correct answer.</small>
                         </div>
-                        @for (int j = 0; j < Model.Questions[i].Choices.Count; j++)
-                        {
-                            <div class="input-group mb-2">
-                                <div class="input-group-prepend">
-                                    <div class="input-group-text">
-                                        <input type="radio" name="Questions[@i].CorrectChoiceIndex" value="@j"
-                                        @(Model.Questions[i].CorrectChoiceIndex == j ? "checked" : "") required />
+
+                        <div class="choices-container">
+                            @for (int j = 0; j < Model.Questions[i].Choices.Count; j++)
+                            {
+                                <div class="input-group mb-2 choice-item">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">
+                                            <input type="radio" name="Questions[@i].CorrectChoiceIndex" value="@j"
+                                            @(Model.Questions[i].CorrectChoiceIndex == j ? "checked" : "") required />
+                                        </div>
                                     </div>
+                                    <input name="Questions[@i].Choices[@j].ChoiceText" class="form-control"
+                                           value="@Model.Questions[i].Choices[j].ChoiceText" placeholder="Choice @(j + 1)" required />
+                                    @if (j > 1)
+                                    {
+                                        <div class="input-group-append">
+                                            <button class="btn btn-outline-danger remove-choice" type="button">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    }
                                 </div>
-                                <input name="Questions[@i].Choices[@j].ChoiceText" class="form-control"
-                                       value="@Model.Questions[i].Choices[j].ChoiceText" placeholder="Choice @(j + 1)" required />
-                            </div>
+                            }
+                        </div>
+
+                        @if (Model.Questions[i].Choices.Count < 4)
+                        {
+                            <button type="button" class="btn btn-outline-primary btn-sm add-choice mt-2">
+                                Add Choice
+                            </button>
                         }
                     </div>
                 </div>
@@ -103,23 +121,24 @@
             // Add a new question
             $('#add-question').click(function () {
                 const newQuestion = `
-                                <div class="card mb-4 question-card">
-                                    <div class="card-header d-flex justify-content-between align-items-center">
-                                        <h5>Question ${questionIndex + 1}</h5>
-                                        <button type="button" class="btn btn-danger btn-sm remove-question" data-index="${questionIndex}">Remove</button>
+                            <div class="card mb-4 question-card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5>Question ${questionIndex + 1}</h5>
+                                    <button type="button" class="btn btn-danger btn-sm remove-question" data-index="${questionIndex}">Remove</button>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label class="control-label">Question Text</label>
+                                        <input name="Questions[${questionIndex}].QuestionText" class="form-control" required />
                                     </div>
-                                    <div class="card-body">
-                                        <div class="form-group">
-                                            <label class="control-label">Question Text</label>
-                                            <input name="Questions[${questionIndex}].QuestionText" class="form-control" required />
-                                        </div>
 
-                                        <div class="mt-3 mb-2">
-                                            <label class="control-label">Choices</label>
-                                            <small class="text-muted d-block mb-2">Select the radio button next to the correct answer.</small>
-                                        </div>
+                                    <div class="mt-3 mb-2">
+                                        <label class="control-label">Choices</label>
+                                        <small class="text-muted d-block mb-2">Select the radio button next to the correct answer.</small>
+                                    </div>
 
-                                        <div class="input-group mb-2">
+                                    <div class="choices-container">
+                                        <div class="input-group mb-2 choice-item">
                                             <div class="input-group-prepend">
                                                 <div class="input-group-text">
                                                     <input type="radio" name="Questions[${questionIndex}].CorrectChoiceIndex" value="0" checked required />
@@ -128,7 +147,7 @@
                                             <input name="Questions[${questionIndex}].Choices[0].ChoiceText" class="form-control" placeholder="Choice 1" required />
                                         </div>
 
-                                        <div class="input-group mb-2">
+                                        <div class="input-group mb-2 choice-item">
                                             <div class="input-group-prepend">
                                                 <div class="input-group-text">
                                                     <input type="radio" name="Questions[${questionIndex}].CorrectChoiceIndex" value="1" required />
@@ -136,27 +155,14 @@
                                             </div>
                                             <input name="Questions[${questionIndex}].Choices[1].ChoiceText" class="form-control" placeholder="Choice 2" required />
                                         </div>
-
-                                        <div class="input-group mb-2">
-                                            <div class="input-group-prepend">
-                                                <div class="input-group-text">
-                                                    <input type="radio" name="Questions[${questionIndex}].CorrectChoiceIndex" value="2" required />
-                                                </div>
-                                            </div>
-                                            <input name="Questions[${questionIndex}].Choices[2].ChoiceText" class="form-control" placeholder="Choice 3" required />
-                                        </div>
-
-                                        <div class="input-group mb-2">
-                                            <div class="input-group-prepend">
-                                                <div class="input-group-text">
-                                                    <input type="radio" name="Questions[${questionIndex}].CorrectChoiceIndex" value="3" required />
-                                                </div>
-                                            </div>
-                                            <input name="Questions[${questionIndex}].Choices[3].ChoiceText" class="form-control" placeholder="Choice 4" required />
-                                        </div>
                                     </div>
+
+                                    <button type="button" class="btn btn-outline-primary btn-sm add-choice mt-2">
+                                        Add Choice
+                                    </button>
                                 </div>
-                                `;
+                            </div>
+                        `;
 
                 $('#questions-container').append(newQuestion);
                 questionIndex++;
@@ -173,6 +179,71 @@
                     });
                 } else {
                     alert('You must have at least one question.');
+                }
+            });
+
+            // Add a choice
+            $(document).on('click', '.add-choice', function () {
+                const questionCard = $(this).closest('.question-card');
+                const choicesContainer = questionCard.find('.choices-container');
+                const choiceCount = choicesContainer.find('.choice-item').length;
+
+                if (choiceCount >= 4) {
+                    return; // Maximum 4 choices
+                }
+
+                // Get the question index
+                const questionIdx = questionCard.index();
+
+                const newChoice = `
+                            <div class="input-group mb-2 choice-item">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text">
+                                        <input type="radio" name="Questions[${questionIdx}].CorrectChoiceIndex" value="${choiceCount}" required />
+                                    </div>
+                                </div>
+                                <input name="Questions[${questionIdx}].Choices[${choiceCount}].ChoiceText" class="form-control" placeholder="Choice ${choiceCount + 1}" required />
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-danger remove-choice" type="button">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+
+                choicesContainer.append(newChoice);
+
+                // Hide the "Add Choice" button if we've reached 4 choices
+                if (choiceCount + 1 >= 4) {
+                    $(this).hide();
+                }
+            });
+
+            // Remove a choice
+            $(document).on('click', '.remove-choice', function () {
+                const questionCard = $(this).closest('.question-card');
+                const choicesContainer = questionCard.find('.choices-container');
+                const choiceItem = $(this).closest('.choice-item');
+
+                if (choicesContainer.find('.choice-item').length > 2) {
+                    // Get the index of this choice
+                    const choiceIndex = choiceItem.index();
+
+                    // Remove the choice
+                    choiceItem.remove();
+
+                    // Update the indices of remaining choices
+                    const questionIdx = questionCard.index();
+                    choicesContainer.find('.choice-item').each(function (idx) {
+                        $(this).find('input[type="radio"]').attr('value', idx);
+                        $(this).find('input[type="text"]').attr('name', `Questions[${questionIdx}].Choices[${idx}].ChoiceText`);
+                        $(this).find('input[type="text"]').attr('placeholder', `Choice ${idx + 1}`);
+                    });
+
+                    // Show the "Add Choice" button since we now have fewer than 4 choices
+                    questionCard.find('.add-choice').show();
+                } else {
+                    alert('You must have at least 2 choices.');
                 }
             });
         });

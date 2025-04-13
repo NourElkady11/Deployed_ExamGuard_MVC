@@ -5,15 +5,7 @@ using DataAccess_Layer.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Presentation_Layer.ViewModels;
-using Services.Abstraction;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Presentation_Layer.Controllers
 {
@@ -42,12 +34,11 @@ namespace Presentation_Layer.Controllers
             {
                 return NotFound();
             }
-
             var viewModel = new ExamViewModel
             {
                 CourseId = courseId,
                 CourseName = course.Name,
-                Date = DateTime.Now.Date,
+                Date = DateTime.Now.Date, // Current date is set by default
                 DurationMinutes = 60,
                 Questions = new List<QuestionViewModel>
                 {
@@ -56,14 +47,13 @@ namespace Presentation_Layer.Controllers
                         Choices = new List<ChoiceViewModel>
                         {
                             new ChoiceViewModel { ChoiceText = "" },
-                            new ChoiceViewModel { ChoiceText = "" },
-                            new ChoiceViewModel { ChoiceText = "" },
                             new ChoiceViewModel { ChoiceText = "" }
+                            // Only 2 choices by default now
                         }
                     }
-                }
+        }
+                
             };
-
             return View(viewModel);
         }
 
@@ -88,7 +78,7 @@ namespace Presentation_Layer.Controllers
                         Date = DateOnly.FromDateTime(examViewModel.Date),
                         CourseId = examViewModel.CourseId,
                         TotalGrade = examViewModel.Questions.Count,
-                     
+
                     };
 
                     foreach (var questionVM in examViewModel.Questions)
@@ -117,7 +107,8 @@ namespace Presentation_Layer.Controllers
 
                     return RedirectToAction("Index", "Course");
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
 
                     if (!await ExamExists(examViewModel.Id))
                     {
@@ -129,7 +120,7 @@ namespace Presentation_Layer.Controllers
                     }
                     return View(examViewModel);
                 }
-                
+
             }
             else
             {
@@ -157,7 +148,7 @@ namespace Presentation_Layer.Controllers
                 CourseId = exam.CourseId ?? 0,
                 CourseName = exam.Course?.Name,
                 TotalGrade = exam.TotalGrade ?? 0,
-                Questions = new List<QuestionViewModel>(),  
+                Questions = new List<QuestionViewModel>(),
 
             };
 
@@ -215,9 +206,9 @@ namespace Presentation_Layer.Controllers
                     exam.Code = examViewModel.Code;
                     exam.Duration = TimeOnly.FromTimeSpan(TimeSpan.FromMinutes(examViewModel.DurationMinutes));
                     exam.Date = DateOnly.FromDateTime(examViewModel.Date);
-                    exam.TotalGrade = examViewModel.Questions.Count; 
+                    exam.TotalGrade = examViewModel.Questions.Count;
 
-                  
+
                     foreach (var question in exam.Questions.ToList())
                     {
                         foreach (var choice in question.Choices.ToList())
@@ -260,7 +251,7 @@ namespace Presentation_Layer.Controllers
                     }
                     else
                     {
-                        ModelState.AddModelError("",ex.Message);
+                        ModelState.AddModelError("", ex.Message);
                     }
                 }
                 return View(examViewModel);
