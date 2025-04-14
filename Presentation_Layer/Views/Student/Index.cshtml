@@ -42,10 +42,10 @@
                                             <span class="badge bg-info">@(@course.Exams?.Count ?? 0) Exams</span>
                                         </td>
                                         <td>
-                                            <a href="@Url.Action("Details", "Student", new { id = course.Id })"
+                                      @*       <a href="@Url.Action("Details", "Student", new { id = course.Id })"
                                                class="btn btn-sm btn-outline-info">
                                                 <i class="fas fa-info-circle"></i> Details
-                                            </a>
+                                            </a> *@
                                             <a href="@Url.Action("GetCourseExams", "Student", new { courseId = course.Id })"
                                                class="btn btn-sm btn-outline-warning">
                                                 <i class="fas fa-file-alt"></i> View Exams

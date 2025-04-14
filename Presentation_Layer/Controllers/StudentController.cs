@@ -223,7 +223,7 @@ namespace Presentation_Layer.Controllers
             return View();
         }
 
-        [HttpPost]
+   /*     [HttpPost]
         public async Task<IActionResult> ReceiveDetection([FromBody] dynamic detection)
         {
             try
@@ -241,7 +241,7 @@ namespace Presentation_Layer.Controllers
                 Console.WriteLine($"Error: {ex.Message}");
                 return StatusCode(500, "Error processing detection");
             }
-        }
+        }*/
 
 
         public async Task<IActionResult> GetAllGrades()
