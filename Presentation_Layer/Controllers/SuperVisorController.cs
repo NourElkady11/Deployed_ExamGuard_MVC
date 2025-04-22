@@ -2,8 +2,10 @@
 using DataAccess_Layer.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using Presentation_Layer.ViewModels;
 using Services.Abstraction;
+using ViewModels;
 
 namespace Presentation_Layer.Controllers
 {
@@ -34,6 +36,7 @@ namespace Presentation_Layer.Controllers
             ViewBag.mycourseId = courseid;
             return View(exams);
         }
+
 
         public async Task<IActionResult> ShowExam(int id)
         {
@@ -89,6 +92,131 @@ namespace Presentation_Layer.Controllers
 
             }
 
+        }
+
+        public async Task<IActionResult> GetAllReports()
+        {
+            var allReports = await unitOfWork.CheatingReportRepository.GetAllAsync();
+            var examsWithReports = await unitOfWork.ExamRepository.GetAllAsync();
+
+            // Group all reports by exam and then by student
+            var examReportSummaries = allReports
+                .GroupBy(r => r.ExamId)
+                .Select(g => new ExamCheatingReportSummary
+                {
+                    Exam = examsWithReports.FirstOrDefault(e => e.Id == g.Key),
+                    ReportCount = g.Count(),
+                    StudentsWithReports = g.GroupBy(r => r.StudentId)
+                        .Count(),
+                    TopDetectionTypes = g.GroupBy(r => r.DetectionType)
+                        .OrderByDescending(dg => dg.Count())
+                        .Take(3)
+                        .Select(dg => new DetectionCount
+                        {
+                            DetectionType = dg.Key,
+                            Count = dg.Count()
+                        })
+                        .ToList()
+                })
+                .OrderByDescending(s => s.ReportCount)
+                .ToList();
+
+            var viewModel = new AllReportsViewModel
+            {
+                ExamReportSummaries = examReportSummaries,
+                TotalReports = allReports.Count(),
+                TotalExamsWithReports = examReportSummaries.Count
+            };
+
+            return View(viewModel);
+        }
+
+
+        // Add these methods to SuperVisorController
+
+        public async Task<IActionResult> ViewExamReports(int examId)
+        {
+            var exam = await unitOfWork.ExamRepository.GetAsync(examId);
+            if (exam == null)
+            {
+                return NotFound();
+            }
+            var reports = await unitOfWork.CheatingReportRepository.GetReportsByExamIdAsync(examId);
+
+            // Group reports by student and detection type for summary
+            var reportSummary = reports
+                .GroupBy(r => new { r.StudentId, r.StudentName, r.StudentEmail })
+                .Select(g => new StudentReportSummary
+                {
+                    StudentId = g.Key.StudentId??0,
+                    StudentName = g.Key.StudentName,
+                    StudentEmail = g.Key.StudentEmail,
+                    DetectionCounts = g.GroupBy(r => r.DetectionType)
+                        .Select(dg => new DetectionCount
+                        {
+                            DetectionType = dg.Key,
+                            Count = dg.Count()
+                        }).ToList(),
+                    TotalDetections = g.Count()
+                })
+                .OrderByDescending(s => s.TotalDetections)
+                .ToList();
+
+            var viewModel = new ExamReportsViewModel
+            {
+                Exam = exam,
+                ReportSummary = reportSummary,
+                DetailedReports = reports
+            };
+
+            return View(viewModel);
+        }
+
+        public async Task<IActionResult> ViewStudentExamReport(int examId, int studentId)
+        {
+            var exam = await unitOfWork.ExamRepository.GetAsync(examId);
+            var student = await unitOfWork.StudentsRepo.GetAsync(studentId);
+
+            if (exam == null || student == null)
+            {
+                return NotFound();
+            }
+
+            var reports = await unitOfWork.CheatingReportRepository.GetReportsByExamAndStudentAsync(examId, studentId);
+
+            var viewModel = new StudentExamReportViewModel
+            {
+                Exam = exam,
+                Student = student,
+                Reports = reports
+            };
+
+            return View(viewModel);
+        }
+
+        public async Task<IActionResult> ViewReportImage(string imagePath)
+        {
+            try
+            {
+                // Fetch the image from Python API
+                var response = await _httpClient.GetAsync($"http://localhost:5000/get_snapshot/{imagePath}");
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    var imageData = JsonConvert.DeserializeObject<dynamic>(responseBody);
+
+                    ViewBag.ImageData = imageData.image.ToString();
+                    return View();
+                }
+                else
+                {
+                    return StatusCode(500, "Failed to fetch image.");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error: {ex.Message}");
+            }
         }
 
 

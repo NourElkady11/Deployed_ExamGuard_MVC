@@ -26,6 +26,8 @@ namespace Data.Models
 
         public ICollection<StudentExam>? studentExams { get; set; }= new List<StudentExam>();
 
+        public ICollection<CheatingReport>? CheatingReports { get; set; } = new List<CheatingReport>();
+
         public ICollection<StudentAnswer>? StudentAnswers { get; set; } = new List<StudentAnswer>();
 
 

@@ -1,0 +1,112 @@
+﻿@model ViewModels.ExamReportsViewModel
+@{
+    ViewData["Title"] = "Exam Cheating Reports";
+}
+
+<div class="container mt-4">
+    <h2>Cheating Reports for @Model.Exam.Subject (@Model.Exam.Code)</h2>
+    <hr />
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Summary</h4>
+        </div>
+        <div class="card-body">
+            @if (Model.ReportSummary.Count > 0)
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Email</th>
+                                <th>Detection Types</th>
+                                <th>Total Detections</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var summary in Model.ReportSummary)
+                            {
+                                <tr>
+                                    <td>@summary.StudentName</td>
+                                    <td>@summary.StudentEmail</td>
+                                    <td>
+                                        @foreach (var detection in summary.DetectionCounts)
+                                        {
+                                            <span class="badge bg-danger me-1">
+                                                @detection.DetectionType: @detection.Count times
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>@summary.TotalDetections</td>
+                                    <td>
+                                        <a href="/SuperVisor/ViewStudentExamReport?examId=@Model.Exam.Id&studentId=@summary.StudentId"
+                                           class="btn btn-sm btn-primary">
+                                            View Details
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-center">No cheating detected in this exam.</p>
+            }
+        </div>
+    </div>
+
+   @*  <div class="card">
+        <div class="card-header">
+            <h4>All Incidents</h4>
+        </div>
+        <div class="card-body">
+            @if (Model.DetailedReports.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Detection Type</th>
+                                <th>Time</th>
+                                <th>Evidence</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var report in Model.DetailedReports)
+                            {
+                                <tr>
+                                    <td>@report.StudentName</td>
+                                    <td>
+                                        <span class="badge bg-danger">@report.DetectionType</span>
+                                    </td>
+                                    <td>@report.DetectionTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                    <td>
+                                        <a href="/SuperVisor/ViewReportImage?imagePath=@report.ImagePath"
+                                           class="btn btn-sm btn-secondary" target="_blank">
+                                            View Image
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-center">No incidents recorded for this exam.</p>
+            }
+        </div>
+    </div> *@
+
+    <div class="mt-4">
+        <a href="/SuperVisor/GetCourseExams?courseid=@Model.Exam.CourseId" class="btn btn-secondary">
+            Back to Exams
+        </a>
+    </div>
+</div>

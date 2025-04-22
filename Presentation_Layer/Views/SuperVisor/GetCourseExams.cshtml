@@ -35,14 +35,18 @@
                             </div>
                         </div>
                         <div class="card-footer bg-white border-top-0">
-
-                            <div class="card-footer bg-white border-top-0">
-                                <a asp-action="ShowExam" asp-controller="SuperVisor" asp-route-id="@exam.Id" class="btn btn-outline-secondary w-100">
+                            <div class="d-flex justify-content-center gap-3">
+                                <a asp-action="ShowExam" asp-controller="SuperVisor" asp-route-id="@exam.Id"
+                                   class="btn btn-outline-secondary">
                                     <i class="bi bi-pencil"></i> Show Questions
                                 </a>
+                                <a asp-action="ViewExamReports" asp-controller="SuperVisor" asp-route-examId="@exam.Id"
+                                   class="btn btn-warning">
+                                    <i class="bi bi-exclamation-triangle"></i> View Cheating Reports
+                                </a>
                             </div>
-
                         </div>
+
                     </div>
                 </div>
             }

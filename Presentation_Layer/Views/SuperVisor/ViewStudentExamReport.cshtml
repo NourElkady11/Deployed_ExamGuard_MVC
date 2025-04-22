@@ -1,0 +1,81 @@
+﻿@model ViewModels.StudentExamReportViewModel
+@{
+    ViewData["Title"] = "Student Exam Report";
+}
+
+<div class="container mt-4">
+    <h2>Cheating Report: @Model.Student.Name</h2>
+    <h4>Exam: @Model.Exam.Subject (@Model.Exam.Code)</h4>
+    <hr />
+
+    <div class="card">
+        <div class="card-header">
+            <h4>Incident Details</h4>
+        </div>
+        <div class="card-body">
+            @if (Model.Reports.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Incident #</th>
+                                <th>Detection Type</th>
+                                <th>Time</th>
+                                <th>Evidence</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int counter = 1;
+                                foreach (var report in Model.Reports.OrderBy(r => r.DetectionTime))
+                                {
+                                    <tr>
+                                        <td>@counter</td>
+                                        <td>
+                                            <span class="badge bg-danger">@report.DetectionType</span>
+                                        </td>
+                                        <td>@report.DetectionTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                        <td>
+                                            <a href="/SuperVisor/ViewReportImage?imagePath=@report.ImagePath"
+                                               class="btn btn-sm btn-secondary" target="_blank">
+                                                View Image
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    counter++;
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-4">
+                    <h5>Summary:</h5>
+                    @{
+                        var detectionSummary = Model.Reports
+                        .GroupBy(r => r.DetectionType)
+                        .Select(g => new { DetectionType = g.Key, Count = g.Count() })
+                        .OrderByDescending(x => x.Count);
+                    }
+                    <ul>
+                        @foreach (var item in detectionSummary)
+                        {
+                            <li><strong>@item.DetectionType:</strong> Detected @item.Count times</li>
+                        }
+                    </ul>
+                </div>
+            }
+            else
+            {
+                <p class="text-center">No incidents recorded for this student in this exam.</p>
+            }
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="/SuperVisor/ViewExamReports?examId=@Model.Exam.Id" class="btn btn-secondary">
+            Back to Exam Reports
+        </a>
+    </div>
+</div>

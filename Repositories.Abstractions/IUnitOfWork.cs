@@ -15,6 +15,7 @@ namespace DataAccess_Layer.Repositories
         public IExamRepository ExamRepository { get; }
         public IStudentExamRepository StudentExamRepository { get; }
         IStudentAnswerRepository StudentAnswerRepository { get; }
+        ICheatingReportRepository CheatingReportRepository { get; }
         public Task <int> SaveChangesAsync();
     }
 }

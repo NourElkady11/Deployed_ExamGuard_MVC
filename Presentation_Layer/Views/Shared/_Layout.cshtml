@@ -51,10 +51,10 @@
                             @if (User.IsInRole("SuperVisor"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link" asp-area="" asp-controller="Exams" asp-action="Index">Exams</a>
+                                    <a class="nav-link" asp-area="" asp-controller="SuperVisor" asp-action="GetAllCourses" asp-route-userEmail="@userEmail">Courses</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" asp-area="" asp-controller="Report" asp-action="Index">Report</a>
+                                    <a class="nav-link" asp-area="" asp-controller="SuperVisor" asp-action="GetAllReports">Reports</a>
                                 </li>
                             }
                             @if (User.IsInRole("Student"))

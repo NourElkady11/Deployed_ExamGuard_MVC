@@ -1,0 +1,25 @@
+﻿@{
+    ViewData["Title"] = "View Report Image";
+    var imageData = ViewBag.ImageData;
+}
+
+<div class="container mt-4">
+    <h2>Evidence Image</h2>
+    <div class="card">
+        <div class="card-body text-center">
+            @if (!string.IsNullOrEmpty(imageData))
+            {
+                <img src="data:image/jpeg;base64,@imageData" class="img-fluid" alt="Evidence Image" />
+            }
+            else
+            {
+                <div class="alert alert-danger">
+                    Image not available
+                </div>
+            }
+        </div>
+    </div>
+    <div class="mt-3">
+        <button class="btn btn-secondary" onclick="window.close()">Close</button>
+    </div>
+</div>

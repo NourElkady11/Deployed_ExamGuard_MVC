@@ -31,5 +31,7 @@ namespace DataAccess_Layer.Models
 
         public ICollection<StudentAnswer>? StudentAnswers { get; set; } = new List<StudentAnswer>();
 
+        public ICollection<CheatingReport>? CheatingReports { get; set; } = new List<CheatingReport>();
+
     }
 }

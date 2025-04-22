@@ -77,6 +77,9 @@ namespace Data.Data
 
             modelBuilder.Entity<Exam>().HasMany(se => se.studentExams).WithOne(e => e.exam).HasForeignKey(se => se.ExamId).OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<Exam>().HasMany(se => se.CheatingReports).WithOne(e => e.Exam).HasForeignKey(se => se.ExamId);
+
+            modelBuilder.Entity<Student>().HasMany(se => se.CheatingReports).WithOne(e => e.Student).HasForeignKey(se => se.StudentId);
 
         }
 
@@ -87,6 +90,7 @@ namespace Data.Data
         public DbSet<StudentExam> StudentExams { get; set; }
         public DbSet<StudentAnswer> studentAnswers { get; set; }
         public DbSet<CourseStudent> CourseStudents { get; set; }
+        public DbSet<CheatingReport> CheatingReports { get; set; }
 
 
     }
