@@ -38,7 +38,7 @@ namespace Presentation_Layer.Controllers
             {
                 CourseId = courseId,
                 CourseName = course.Name,
-                Date = DateTime.Now.Date, // Current date is set by default
+                Date = DateTime.Now.Date, 
                 DurationMinutes = 60,
                 Questions = new List<QuestionViewModel>
                 {
@@ -48,7 +48,6 @@ namespace Presentation_Layer.Controllers
                         {
                             new ChoiceViewModel { ChoiceText = "" },
                             new ChoiceViewModel { ChoiceText = "" }
-                            // Only 2 choices by default now
                         }
                     }
         }

@@ -36,6 +36,80 @@ namespace Presentation_Layer.Controllers
             return View(exams);
         }
 
+        public async Task<IActionResult> GetAllGrades()
+        {
+            // Get current student information
+            var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email);
+            var student = await unitOfWork.StudentsRepo.GetStudentWithEmail(email.Value);
+
+            if (student == null)
+            {
+                return NotFound("Student not found.");
+            }
+
+          
+            var studentExams = await unitOfWork.StudentExamRepository.GetStudentExamsAsync(student.Id);
+
+         
+            var studentCourses = await unitOfWork.CoursesRepo.GetCourseWithExamssAsync();
+
+            
+            var viewModel = new StudentGradesViewModel
+            {
+                StudentId = student.Id,
+                StudentName = student.Name,
+                StudentEmail = student.Email,
+                Courses = new List<CourseGradesViewModel>(),
+                TotalCompletedExams = studentExams.Count(se => se.Status == "Completed"),
+                AverageGrade = studentExams.Any(se => se.Status == "Completed")
+                    ? studentExams.Where(se => se.Status == "Completed").Average(se => se.Grade)
+                    : 0
+            };
+
+            // Group exams by course
+            foreach (var course in studentCourses)
+            {
+                if (course == null) continue;
+
+                // Get all exams for this course
+                var courseExams = await unitOfWork.ExamRepository.GetCourseExamsAsync(course.Id);
+
+                var courseViewModel = new CourseGradesViewModel
+                {
+                    CourseId = course.Id,
+                    CourseName = course.Name,
+                    CourseCode = course.Code,
+                    Exams = new List<ExamGradeViewModel>()
+                };
+
+                // Add exam details
+                foreach (var exam in courseExams)
+                {
+                    var studentExam = studentExams.FirstOrDefault(se => se.ExamId == exam.Id);
+
+                    var examViewModel = new ExamGradeViewModel
+                    {
+                        ExamId = exam.Id,
+                        ExamSubject = exam.Subject,
+                        ExamCode = exam.Code,
+                        ExamDate = exam.Date.ToDateTime(TimeOnly.MinValue),
+                        Grade = studentExam?.Grade ?? 0,
+                        Status = studentExam?.Status ?? "Not Taken"
+                    };
+
+                    courseViewModel.Exams.Add(examViewModel);
+                }
+
+                // Only add courses that have exams
+                if (courseViewModel.Exams.Any())
+                {
+                    viewModel.Courses.Add(courseViewModel);
+                }
+            }
+
+            return View(viewModel);
+        }
+
 
         public async Task<IActionResult> GoToExam(int examId)
         {
@@ -50,7 +124,6 @@ namespace Presentation_Layer.Controllers
             var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email);
             var student = await unitOfWork.StudentsRepo.GetStudentWithEmail(email.Value);
             var userId = student.Id;
-         /*   var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);*/
             var exam = await unitOfWork.ExamRepository.GetExamWithQuestionsAndChoicesAsync(examId);
             var studentExam = await unitOfWork.StudentExamRepository.GetAsync(userId, examId);
 
@@ -71,9 +144,6 @@ namespace Presentation_Layer.Controllers
 
             return View(reviewViewModel);
         }
-
-
-        // Add these methods to StudentController
 
         [HttpGet]
         public async Task<IActionResult> GetDetectionResults(int examId)
@@ -150,14 +220,9 @@ namespace Presentation_Layer.Controllers
                 var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email);
                 var student = await unitOfWork.StudentsRepo.GetStudentWithEmail(email.Value);
                 var userId = student.Id;
-                /* var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);*/
-
-                // Get the exam with questions and choices
                 var exam = await unitOfWork.ExamRepository.GetExamWithQuestionsAndChoicesAsync(examId);
                 if (exam == null)
                     return StatusCode(500, "Exam not found");
-
-                // Calculate grade
                 int correctAnswers = 0;
                 int totalQuestions = exam.Questions.Count;
 
@@ -251,101 +316,6 @@ namespace Presentation_Layer.Controllers
         public async Task<IActionResult> ExamComplete()
         {
             return View();
-        }
-
-        /*     [HttpPost]
-             public async Task<IActionResult> ReceiveDetection([FromBody] dynamic detection)
-             {
-                 try
-                 {
-                     // Extract label from the detection object and show alert
-                     var label = detection.label[0].ToString(); // Extract the label
-                     Console.WriteLine($"Cheating Detected: {label}");  // Log the detection
-                     TempData["detections"] = label;
-
-                     // You can return the detection label or other data
-                     return Json(new { success = true });
-                 }
-                 catch (Exception ex)
-                 {
-                     Console.WriteLine($"Error: {ex.Message}");
-                     return StatusCode(500, "Error processing detection");
-                 }
-             }*/
-
-
-        public async Task<IActionResult> GetAllGrades()
-        {
-            // Get current student information
-            var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email);
-            var student = await unitOfWork.StudentsRepo.GetStudentWithEmail(email.Value);
-
-            if (student == null)
-            {
-                return NotFound("Student not found.");
-            }
-
-            // Get all student exams
-            var studentExams = await unitOfWork.StudentExamRepository.GetStudentExamsAsync(student.Id);
-
-            // Get all courses the student is enrolled in
-            var studentCourses = student.CourseStudents?.Select(cs => cs.Course)?.ToList() ?? new List<Course>();
-
-            // Create the view model
-            var viewModel = new StudentGradesViewModel
-            {
-                StudentId = student.Id,
-                StudentName = student.Name,
-                StudentEmail = student.Email,
-                Courses = new List<CourseGradesViewModel>(),
-                TotalCompletedExams = studentExams.Count(se => se.Status == "Completed"),
-                AverageGrade = studentExams.Any(se => se.Status == "Completed")
-                    ? studentExams.Where(se => se.Status == "Completed").Average(se => se.Grade)
-                    : 0
-            };
-
-            // Group exams by course
-            foreach (var course in studentCourses)
-            {
-                if (course == null) continue;
-
-                // Get all exams for this course
-                var courseExams = await unitOfWork.ExamRepository.GetCourseExamsAsync(course.Id);
-
-                var courseViewModel = new CourseGradesViewModel
-                {
-                    CourseId = course.Id,
-                    CourseName = course.Name,
-                    CourseCode = course.Code,
-                    Exams = new List<ExamGradeViewModel>()
-                };
-
-                // Add exam details
-                foreach (var exam in courseExams)
-                {
-                    var studentExam = studentExams.FirstOrDefault(se => se.ExamId == exam.Id);
-
-                    var examViewModel = new ExamGradeViewModel
-                    {
-                        ExamId = exam.Id,
-                        ExamSubject = exam.Subject,
-                        ExamCode = exam.Code,
-                        ExamDate = exam.Date.ToDateTime(TimeOnly.MinValue),
-                        Grade = studentExam?.Grade ?? 0,
-                        Status = studentExam?.Status ?? "Not Taken"
-                    };
-
-                    courseViewModel.Exams.Add(examViewModel);
-                }
-
-                // Only add courses that have exams
-                if (courseViewModel.Exams.Any())
-                {
-                    viewModel.Courses.Add(courseViewModel);
-                }
-            }
-
-            return View(viewModel);
         }
 
 
