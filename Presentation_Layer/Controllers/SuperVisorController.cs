@@ -93,40 +93,61 @@ namespace Presentation_Layer.Controllers
             }
 
         }
-
         public async Task<IActionResult> GetAllReports()
         {
-            var allReports = await unitOfWork.CheatingReportRepository.GetAllAsync();
-            var examsWithReports = await unitOfWork.ExamRepository.GetAllAsync();
+            var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email);
+            var supervisor = await unitOfWork.SuperVisorRepository.GetSuperVisorWithEmail(email.Value);
+            var courses = await unitOfWork.CoursesRepo.GetSuperVisorCourses(supervisor.Id);
 
-            // Group all reports by exam and then by student
-            var examReportSummaries = allReports
-                .GroupBy(r => r.ExamId)
-                .Select(g => new ExamCheatingReportSummary
+            // Create lists to collect all data across all courses and exams
+            List<ExamCheatingReportSummary> allExamReportSummaries = new List<ExamCheatingReportSummary>();
+            int totalReportsCount = 0;
+
+            foreach (var course in courses)
+            {
+                var courseExams = await unitOfWork.ExamRepository.GetCourseExamsAsync(course.Id);
+
+                foreach (var exam in course.Exams)
                 {
-                    Exam = examsWithReports.FirstOrDefault(e => e.Id == g.Key),
-                    ReportCount = g.Count(),
-                    StudentsWithReports = g.GroupBy(r => r.StudentId)
-                        .Count(),
-                    TopDetectionTypes = g.GroupBy(r => r.DetectionType)
-                        .OrderByDescending(dg => dg.Count())
-                        .Take(3)
-                        .Select(dg => new DetectionCount
-                        {
-                            DetectionType = dg.Key,
-                            Count = dg.Count()
-                        })
-                        .ToList()
-                })
-                .OrderByDescending(s => s.ReportCount)
-                .ToList();
+                    var allReports = await unitOfWork.CheatingReportRepository.GetReportsByExamIdAsync(exam.Id);
+                    totalReportsCount += allReports.Count();
 
+                    if (allReports.Any())
+                    {
+                        // Group all reports by exam and then by student
+                        var examReportSummary = new ExamCheatingReportSummary
+                        {
+                            Exam = courseExams.FirstOrDefault(e => e.Id == exam.Id),
+                            ReportCount = allReports.Count(),
+                            StudentsWithReports = allReports.GroupBy(r => r.StudentId).Count(),
+                            TopDetectionTypes = allReports.GroupBy(r => r.DetectionType)
+                                .OrderByDescending(dg => dg.Count())
+                                .Take(3)
+                                .Select(dg => new DetectionCount
+                                {
+                                    DetectionType = dg.Key,
+                                    Count = dg.Count()
+                                })
+                                .ToList()
+                        };
+
+                        allExamReportSummaries.Add(examReportSummary);
+                    }
+                }
+            }
+
+            // Now create the viewModel outside the loops with all the collected data
             var viewModel = new AllReportsViewModel
             {
-                ExamReportSummaries = examReportSummaries,
-                TotalReports = allReports.Count(),
-                TotalExamsWithReports = examReportSummaries.Count
+                ExamReportSummaries = allExamReportSummaries.OrderByDescending(s => s.ReportCount).ToList(),
+                TotalReports = totalReportsCount,
+                TotalExamsWithReports = allExamReportSummaries.Count
             };
+
+            if (viewModel.TotalReports == 0)
+            {
+                return View(new AllReportsViewModel());
+            }
 
             return View(viewModel);
         }

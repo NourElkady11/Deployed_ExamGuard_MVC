@@ -32,10 +32,10 @@
 
 <div class="mt-4 card">
         <div class="card-header bg-primary text-white">
-            <h4>Exams with Cheating Reports</h4>
+            <h4>Courses with Cheating Reports</h4>
         </div>
         <div class="card-body">
-            @if (Model.ExamReportSummaries.Count > 0)
+        @if (Model.ExamReportSummaries != null && Model.ExamReportSummaries.Count > 0)
             {
                 <div class="table-responsive">
                     <table class="table table-striped">
@@ -81,7 +81,7 @@
             }
             else
             {
-                <p class="text-center">No cheating reports found in any exam.</p>
+                <p class="text-center">No cheating reports found in your assigned courses.</p>
             }
         </div>
     </div>
