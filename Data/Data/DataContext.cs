@@ -53,13 +53,13 @@ namespace Data.Data
                 .HasOne(sa => sa.Question)
                 .WithMany(q => q.StudentAnswers)
                 .HasForeignKey(sa => sa.QuestionId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.ClientSetNull);
 
             modelBuilder.Entity<StudentAnswer>()
                 .HasOne(sa => sa.Choice)
                 .WithMany(c => c.StudentAnswers)
                 .HasForeignKey(sa => sa.ChoiceId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.ClientSetNull);
 
             //////////////////////////////////////////////////////////////////////////////////////
 
@@ -67,8 +67,8 @@ namespace Data.Data
 
             modelBuilder.Entity<SuperVisor>().HasMany(s => s.courses).WithOne(s => s.superVisor).HasForeignKey(s => s.SuperVisorId);
 
-            modelBuilder.Entity<Exam>().HasMany(q => q.Questions).WithOne(e => e.Exam).HasForeignKey(q => q.ExamId);
-            modelBuilder.Entity<Question>().HasMany(c => c.Choices).WithOne(q => q.Question).HasForeignKey(c => c.QuestionId);
+            modelBuilder.Entity<Exam>().HasMany(q => q.Questions).WithOne(e => e.Exam).HasForeignKey(q => q.ExamId).OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Question>().HasMany(c => c.Choices).WithOne(q => q.Question).HasForeignKey(c => c.QuestionId).OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<StudentExam>()
                 .HasKey(se => new { se.StudentId, se.ExamId });
@@ -77,7 +77,7 @@ namespace Data.Data
 
             modelBuilder.Entity<Exam>().HasMany(se => se.studentExams).WithOne(e => e.exam).HasForeignKey(se => se.ExamId).OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Exam>().HasMany(se => se.CheatingReports).WithOne(e => e.Exam).HasForeignKey(se => se.ExamId);
+            modelBuilder.Entity<Exam>().HasMany(se => se.CheatingReports).WithOne(e => e.Exam).HasForeignKey(se => se.ExamId).OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Student>().HasMany(se => se.CheatingReports).WithOne(e => e.Student).HasForeignKey(se => se.StudentId);
 

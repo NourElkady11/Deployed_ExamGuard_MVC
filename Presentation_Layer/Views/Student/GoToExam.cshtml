@@ -27,11 +27,9 @@
                 {
                     questionCount++;
                     int pointsPerQuestion = exam.Questions.Count;
-
                     <div class="question-block">
                         <h3>Question @questionCount (@pointsPerQuestion points)</h3>
                         <p>@question.QuestionText</p>
-
                         <div class="options">
                             @foreach (var choice in question.Choices)
                             {
@@ -45,7 +43,6 @@
                     </div>
                 }
             }
-
             <div class="exam-controls d-flex justify-content-end mt-4">
                 <button type="submit" id="submitExam" class="btn btn-primary">Submit Exam</button>
             </div>
@@ -73,24 +70,210 @@
     </div>
 </div>
 
-<script>
-    let isExamActive = true;
-    let timeLeft = @(exam.Duration.Hour * 60 * 60 + exam.Duration.Minute * 60); // Convert duration to seconds
+<div id="leavingExamModal" class="modal fade" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Warning: Leaving Exam</h5>
+            </div>
+            <div class="modal-body">
+                <p>If you leave the exam without submission, you will lose all your answers and your exam will be submitted automatically.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="confirmLeave">Submit and Leave</button>
+                <button type="button" class="btn btn-primary" id="stayInExam">Stay in Exam</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-    window.onload = function () {
-        var examId = @examId;
+<div id="closingExamModal" class="modal fade" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Warning: Closing Exam</h5>
+            </div>
+            <div class="modal-body">
+                <p>If you close this window/tab without submission, you will lose all your answers and your exam will be submitted automatically.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="confirmClose">Submit and Close</button>
+                <button type="button" class="btn btn-primary" id="stayInExamClose">Stay in Exam</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Variables to track exam state
+    let isExamActive = true; // Active from the moment the page loads
+    let timeLeft = @(exam.Duration.Hour * 60 * 60 + exam.Duration.Minute * 60); // Convert duration to seconds
+    let examId = @examId;
+    let isSubmitting = false;
+    let visibilityViolations = 0;
+    let leavingExamModal = null;
+    let closingExamModal = null;
+    let isHandlingCloseEvent = false;
+    let hasChosenToStay = false; // New flag to track if user chose to stay
+
+    // Set up on page load - immediately activate all security measures
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initialize Bootstrap modals
+        leavingExamModal = new bootstrap.Modal(document.getElementById('leavingExamModal'), {
+            backdrop: 'static',
+            keyboard: false
+        });
+
+        closingExamModal = new bootstrap.Modal(document.getElementById('closingExamModal'), {
+            backdrop: 'static',
+            keyboard: false
+        });
+
+        // Set up modal button handlers
+        document.getElementById('confirmLeave').addEventListener('click', function () {
+            leavingExamModal.hide();
+            submitExam(false, "User confirmed leaving the exam");
+        });
+
+        document.getElementById('stayInExam').addEventListener('click', function () {
+            hasChosenToStay = true;
+            leavingExamModal.hide();
+            // Reset the flag after a brief delay to allow the modal to close
+            setTimeout(() => {
+                hasChosenToStay = false;
+            }, 300);
+        });
+
+        document.getElementById('confirmClose').addEventListener('click', function () {
+            closingExamModal.hide();
+            submitExam(false, "User confirmed closing exam");
+        });
+
+        document.getElementById('stayInExamClose').addEventListener('click', function () {
+            hasChosenToStay = true;
+            closingExamModal.hide();
+            // Reset handling flag and chosen to stay flag after a brief delay
+            setTimeout(() => {
+                isHandlingCloseEvent = false;
+                hasChosenToStay = false;
+            }, 300);
+        });
+
+        // Start all security measures immediately
+        startExamLockdown();
         startDetectionPolling(examId);
         startExamTimer();
         setupFormHandling();
-    };
 
-    window.onbeforeunload = function (e) {
-        if (isExamActive) {
-            e.preventDefault();
-            e.returnValue = '';
-            return 'Are you sure you want to leave? Your exam progress will be lost.';
-        }
-    };
+        console.log("Exam security measures activated on page load");
+    });
+
+    function startExamLockdown() {
+        // Immediately disable browser back button when page loads
+        history.pushState(null, document.title, location.href);
+        window.addEventListener('popstate', function (event) {
+            event.preventDefault();
+            history.pushState(null, document.title, location.href);
+
+            // Show warning and auto-submit if they try to go back
+            leavingExamModal.show();
+        });
+
+        // Prevent tab switching/window visibility changes
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden && isExamActive) {
+                // This could be tab switching or window closing
+                visibilityViolations++;
+                showDetectionAlert(`Tab switching detected! (Violation #${visibilityViolations}) - Keep in your Tab!`);
+
+                // If 3 or more violations, auto-submit immediately
+                if (visibilityViolations >= 3) {
+                    showDetectionAlert("3 tab switching violations detected - automatically submitting exam");
+                    submitExam(false, "Auto-submitted due to multiple tab switching violations");
+                }
+            }
+        });
+
+        // Detect focus loss (switching to another application)
+        window.addEventListener('blur', function () {
+            if (isExamActive) {
+                showDetectionAlert("Focus lost from exam window!");
+            }
+        });
+
+        // Block keyboard shortcuts that could navigate away
+        document.addEventListener('keydown', function (e) {
+            if (isExamActive) {
+                // Alt combinations (browser navigation)
+                if (e.altKey) {
+                    e.preventDefault();
+                    showDetectionAlert("Navigation keyboard shortcut blocked!");
+                    return false;
+                }
+
+                // Ctrl combinations (except allowed ones)
+                if (e.ctrlKey) {
+                    // Allow selection (Ctrl+A) but block most others
+                    if (![65].includes(e.keyCode)) {
+                        e.preventDefault();
+                        showDetectionAlert("Keyboard shortcut blocked!");
+                        return false;
+                    }
+                }
+                // Block specific navigation keys
+                const blockedKeys = [
+                    27,  // Escape
+                    116, // F5 (refresh)
+                    112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, // F1-F12
+                    91,  // Windows/Meta key
+                    18   // Alt key
+                ];
+
+                if (blockedKeys.includes(e.keyCode)) {
+                    e.preventDefault();
+                    showDetectionAlert("Navigation key blocked!");
+                    return false;
+                }
+            }
+        });
+
+        // Prevent context menu
+        document.addEventListener('contextmenu', function (e) {
+            if (isExamActive) {
+                e.preventDefault();
+                showDetectionAlert("Right-click menu is disabled during the exam!");
+                return false;
+            }
+        });
+
+        // Better window/tab close handling
+        window.addEventListener('beforeunload', function (e) {
+            if (isExamActive && !isSubmitting && !isHandlingCloseEvent && !hasChosenToStay) {
+                isHandlingCloseEvent = true;
+                e.preventDefault();
+
+                // Show the custom dialog instead of the browser default
+                closingExamModal.show();
+
+                // This return message may still show the browser's confirmation dialog
+                // but we'll suppress it if the user has chosen to stay
+                e.returnValue = 'WARNING: Closing will submit your exam automatically.';
+                return e.returnValue;
+            } else if (hasChosenToStay) {
+                // If the user has chosen to stay, prevent the browser dialog
+                e.preventDefault();
+                e.returnValue = null;
+                return null;
+            }
+        });
+    }
+
+    function handleLeavingAttempt(reason) {
+        if (!isExamActive || isSubmitting) return;
+
+        showDetectionAlert(`${reason}! Leaving will submit your exam automatically.`);
+        leavingExamModal.show();
+    }
 
     function startExamTimer() {
         const timerElement = document.getElementById('timeRemaining');
@@ -103,9 +286,11 @@
 
             timeLeft--;
 
-            const minutes = Math.floor(timeLeft / 60);
+            const hours = Math.floor(timeLeft / 3600);
+            const minutes = Math.floor((timeLeft % 3600) / 60);
             const seconds = timeLeft % 60;
-            timerElement.textContent = `Time Remaining: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+            timerElement.textContent = `Time Remaining: ${hours > 0 ? hours + ':' : ''}${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
             if (timeLeft <= 300) { // Last 5 minutes
                 timerElement.style.color = '#dc3545';
@@ -116,7 +301,7 @@
 
             if (timeLeft <= 0) {
                 clearInterval(timer);
-                submitExam(true);
+                submitExam(true, "Time expired");
             }
         }, 1000);
     }
@@ -125,69 +310,39 @@
         const form = document.getElementById('examForm');
         const submitBtn = document.getElementById('submitExam');
         const confirmSubmitBtn = document.getElementById('confirmSubmit');
-        const modal = new bootstrap.Modal(document.getElementById('confirmSubmitModal'));
+        const confirmModal = new bootstrap.Modal(document.getElementById('confirmSubmitModal'));
 
         form.addEventListener('submit', (e) => {
             e.preventDefault();
-            modal.show();
+            confirmModal.show();
         });
 
         confirmSubmitBtn.addEventListener('click', () => {
-            modal.hide();
-            submitExam(false);
+            confirmModal.hide();
+            submitExam(false, "User submitted exam");
         });
-
-      
     }
 
-    async function submitExam(isTimeUp) {
-        if (!isExamActive) return;
-
-        isExamActive = false;
-        await stopExam();
-
-        const form = document.getElementById('examForm');
-        const formData = new FormData(form);
-        const examData = Object.fromEntries(formData.entries());
-
-        try {
-            const response = await fetch(`/Student/SubmitExam?examId=@examId`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(examData)
-            });
-
-            if (response.ok) {
-                if (isTimeUp) {
-                    alert('Time is up! Your exam has been submitted.');
-                }
-                window.location.href = '/Student/ExamComplete';
-            } else {
-                alert('Failed to submit exam. Please try again.');
-            }
-        } catch (error) {
-            console.error('Error submitting exam:', error);
-            alert('Error submitting exam. Please try again.');
-        }
-    }
-
-
-    function showSaveNotification() {
+    function showDetectionAlert(message) {
         const alertDiv = document.createElement('div');
-        alertDiv.className = 'alert alert-success';
+        alertDiv.className = 'alert alert-danger';
         alertDiv.style.position = 'fixed';
         alertDiv.style.top = '20px';
         alertDiv.style.right = '20px';
         alertDiv.style.padding = '15px';
+        alertDiv.style.backgroundColor = '#f8d7da';
+        alertDiv.style.border = '1px solid #f5c6cb';
+        alertDiv.style.borderRadius = '4px';
         alertDiv.style.zIndex = '1000';
-        alertDiv.textContent = 'Progress saved successfully!';
+        alertDiv.textContent = `⚠️ Warning: ${message}`;
 
-        document.body.appendChild(alertDiv);
-        setTimeout(() => alertDiv.remove(), 3000);
+        // Add the alert to the detection alerts div
+        const alertsContainer = document.getElementById('detectionAlerts');
+        alertsContainer.appendChild(alertDiv);
+
+        // Remove after a few seconds
+        setTimeout(() => alertDiv.remove(), 4000);
     }
-
 
     function startDetectionPolling(examId) {
         async function pollDetections() {
@@ -198,7 +353,7 @@
                 if (data.detections && data.detections.length > 0) {
                     data.detections.forEach(function (detection) {
                         if (detection) {
-                            showDetectionAlert(detection);
+                            showDetectionAlert(`Cheating Detected: ${detection}`);
                         }
                     });
                 }
@@ -211,26 +366,57 @@
         pollDetections();
     }
 
-    function showDetectionAlert(detection) {
-        const alertDiv = document.createElement('div');
-        alertDiv.className = 'alert alert-danger';
-        alertDiv.style.position = 'fixed';
-        alertDiv.style.top = '20px';
-        alertDiv.style.right = '20px';
-        alertDiv.style.padding = '15px';
-        alertDiv.style.backgroundColor = '#f8d7da';
-        alertDiv.style.border = '1px solid #f5c6cb';
-        alertDiv.style.borderRadius = '4px';
-        alertDiv.style.zIndex = '1000';
-        alertDiv.textContent = `⚠️ Cheating Detected: ${detection}`;
-        document.body.appendChild(alertDiv);
-        setTimeout(() => alertDiv.remove(), 3000);
+    async function submitExam(isTimeUp, reason) {
+        if (!isExamActive || isSubmitting) return;
+
+        isSubmitting = true;
+        isExamActive = false;
+        isHandlingCloseEvent = false;
+
+        console.log(`Submitting exam: ${reason || "Not specified"}`);
+
+        await stopExam();
+
+        const form = document.getElementById('examForm');
+        const formData = new FormData(form);
+        const examData = Object.fromEntries(formData.entries());
+
+        try {
+            const response = await fetch(`/Student/SubmitExam?examId=${examId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(examData)
+            });
+
+            if (response.ok) {
+                if (isTimeUp) {
+                    alert('Time is up! Your exam has been submitted.');
+                } else if (reason && reason.includes("Auto-submitted")) {
+                    alert('Your exam has been automatically submitted.');
+                }
+
+                // Remove navigation blockers before redirecting
+                window.onbeforeunload = null;
+
+                window.location.href = '/Student/ExamComplete';
+            } else {
+                alert('Failed to submit exam. Please try again.');
+                isExamActive = true;
+                isSubmitting = false;
+            }
+        } catch (error) {
+            console.error('Error submitting exam:', error);
+            alert('Error submitting exam. Please try again.');
+            isExamActive = true;
+            isSubmitting = false;
+        }
     }
 
     async function stopExam() {
-        isExamActive = false;
         try {
-            await fetch(`/Student/StopExam?examId=${@examId}`);
+            await fetch(`/Student/StopExam?examId=${examId}`);
         } catch (error) {
             console.error("Error stopping exam:", error);
         }

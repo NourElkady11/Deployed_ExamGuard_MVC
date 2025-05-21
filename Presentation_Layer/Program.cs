@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Tokens;
+using Presentation_Layer.Middleware;
 using Services;
 using Services.Abstraction;
 using System.Reflection;
@@ -93,7 +94,6 @@ namespace Presentation_Layer
 
 
 
-
             var app = builder.Build();
             
             // Configure the HTTP request pipeline.
@@ -104,12 +104,14 @@ namespace Presentation_Layer
                 app.UseHsts();
             }
 
+
             app.UseSession();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseAuthenticationStateMiddleware();
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Welcome}/{id?}");
