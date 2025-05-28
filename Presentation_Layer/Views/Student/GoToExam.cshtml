@@ -104,6 +104,24 @@
     </div>
 </div>
 
+<!-- Add this new modal for cheating detection -->
+<div id="cheatingDetectedModal" class="modal fade" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill me-2"></i>Cheating Detected</h5>
+            </div>
+            <div class="modal-body">
+                <p id="cheatingMessage" class="fw-bold">Your exam has been automatically submitted due to violation of exam rules.</p>
+                <p>Cheating attempts have been recorded and reported to your instructor.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" id="acceptCheatingSubmission">I understand</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     // Variables to track exam state
     let isExamActive = true; // Active from the moment the page loads
@@ -111,10 +129,12 @@
     let examId = @examId;
     let isSubmitting = false;
     let visibilityViolations = 0;
+    let objectDetectionViolations = 0; // Track detection alerts
     let leavingExamModal = null;
     let closingExamModal = null;
+    let cheatingDetectedModal = null; // New modal for cheating detected
     let isHandlingCloseEvent = false;
-    let hasChosenToStay = false; // New flag to track if user chose to stay
+    let hasChosenToStay = false; // Flag to track if user chose to stay
 
     // Set up on page load - immediately activate all security measures
     document.addEventListener('DOMContentLoaded', function () {
@@ -125,6 +145,11 @@
         });
 
         closingExamModal = new bootstrap.Modal(document.getElementById('closingExamModal'), {
+            backdrop: 'static',
+            keyboard: false
+        });
+
+        cheatingDetectedModal = new bootstrap.Modal(document.getElementById('cheatingDetectedModal'), {
             backdrop: 'static',
             keyboard: false
         });
@@ -159,6 +184,12 @@
             }, 300);
         });
 
+        document.getElementById('acceptCheatingSubmission').addEventListener('click', function () {
+            cheatingDetectedModal.hide();
+            // Redirect to completion page since the exam is already submitted
+            window.location.href = '/Student/ExamComplete';
+        });
+
         // Start all security measures immediately
         startExamLockdown();
         startDetectionPolling(examId);
@@ -188,8 +219,10 @@
 
                 // If 3 or more violations, auto-submit immediately
                 if (visibilityViolations >= 3) {
-                    showDetectionAlert("3 tab switching violations detected - automatically submitting exam");
                     submitExam(false, "Auto-submitted due to multiple tab switching violations");
+                    // Show a custom modal instead of default alert
+                    document.getElementById('cheatingMessage').textContent = "Your exam has been automatically submitted due to multiple tab switching violations. This behavior is considered cheating.";
+                    cheatingDetectedModal.show();
                 }
             }
         });
@@ -353,7 +386,17 @@
                 if (data.detections && data.detections.length > 0) {
                     data.detections.forEach(function (detection) {
                         if (detection) {
+                            objectDetectionViolations++; // Increment violation counter
                             showDetectionAlert(`Cheating Detected: ${detection}`);
+
+                            // If 5 or more violations, auto-submit immediately
+                            if (objectDetectionViolations >= 5 && isExamActive) {
+                                submitExam(false, "Auto-submitted due to multiple object detection violations");
+                                // Show a custom modal instead of default alert
+                                document.getElementById('cheatingMessage').textContent =
+                                    "Your exam has been automatically submitted due to multiple detected objects that are not allowed during exams. This behavior is considered cheating.";
+                                cheatingDetectedModal.show();
+                            }
                         }
                     });
                 }
@@ -393,24 +436,26 @@
             if (response.ok) {
                 if (isTimeUp) {
                     alert('Time is up! Your exam has been submitted.');
-                } else if (reason && reason.includes("Auto-submitted")) {
-                    alert('Your exam has been automatically submitted.');
                 }
+                // For cheating violations, we'll use the custom modal instead of alert
 
                 // Remove navigation blockers before redirecting
                 window.onbeforeunload = null;
 
-                window.location.href = '/Student/ExamComplete';
+                // Only redirect if not showing a cheating modal
+                if (!reason || (!reason.includes("tab switching") && !reason.includes("object detection"))) {
+                    window.location.href = '/Student/ExamComplete';
+                }
             } else {
                 alert('Failed to submit exam. Please try again.');
                 isExamActive = true;
                 isSubmitting = false;
             }
         } catch (error) {
-            console.error('Error submitting exam:', error);
-            alert('Error submitting exam. Please try again.');
-            isExamActive = true;
-            isSubmitting = false;
+           // console.error('Error submitting exam:', error);
+            //alert('Error submitting exam. Please try again.');
+            //isExamActive = true;
+            //isSubmitting = false;
         }
     }
 

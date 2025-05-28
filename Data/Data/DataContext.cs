@@ -36,6 +36,7 @@ namespace Data.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
              //////////////////////////////////////////////////////////////////////////////
+             //lama tams7 el exam haytms7 3adyw hayms7 el parents lly mawgod 3andhom el forign key dh bas el 7agat lly atms7t dy zy el question haya kaman hatms7 el student anwser raw f maynfa34 3amlyten ye3mlo nafs el 7agaa
 
             modelBuilder.Entity<StudentAnswer>()
                 .HasOne(sa => sa.Student)
@@ -62,6 +63,7 @@ namespace Data.Data
                 .OnDelete(DeleteBehavior.ClientSetNull);
 
             //////////////////////////////////////////////////////////////////////////////////////
+            // exam hayms7 quetions m3ah hal el question mawwgod f table tany 
 
             modelBuilder.Entity<Course>().HasMany(e => e.Exams).WithOne(c => c.Course).HasForeignKey(e => e.CourseId);
 

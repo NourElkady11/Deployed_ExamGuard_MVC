@@ -12,7 +12,7 @@ namespace Presentation_Layer.ViewModels
     {
         public Exam Exam { get; set; }
         public StudentExam StudentExam { get; set; }
-        public Dictionary<int, int> StudentAnswers { get; set; }
+        public Dictionary<int?, int?> StudentAnswers { get; set; }
 
     }
 }

@@ -118,7 +118,6 @@ namespace Presentation_Layer.Controllers
             return View(exam); 
         }
 
-
         public async Task<IActionResult> ReviewExam(int examId)
         {
             var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email);
@@ -139,7 +138,7 @@ namespace Presentation_Layer.Controllers
             {
                 Exam = exam,
                 StudentExam = studentExam,
-                StudentAnswers = studentAnswers.ToDictionary(sa => sa.QuestionId, sa => sa.ChoiceId)
+                StudentAnswers = studentAnswers.ToDictionary(sa => sa.QuestionId, sa => sa.ChoiceId) 
             };
 
             return View(reviewViewModel);

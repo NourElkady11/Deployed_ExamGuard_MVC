@@ -52,9 +52,14 @@
                 foreach (var question in exam.Questions)
                 {
                     questionCount++;
-                    bool hasStudentAnswer = Model.StudentAnswers.TryGetValue(question.Id, out int studentChoiceId);
-                    var studentChoice = hasStudentAnswer ?
-                    question.Choices.FirstOrDefault(c => c.Id == studentChoiceId) : null;
+
+                    bool hasStudentAnswer = Model.StudentAnswers.TryGetValue(question.Id, out int? studentChoiceIdNullable);
+                    int? studentChoiceId = studentChoiceIdNullable;
+
+                    var studentChoice = hasStudentAnswer && studentChoiceId.HasValue
+                    ? question.Choices.FirstOrDefault(c => c.Id == studentChoiceId.Value)
+                    : null;
+
                     var correctChoice = question.Choices.FirstOrDefault(c => c.ChoiceText == question.Answer);
                     bool isCorrect = studentChoice?.ChoiceText == question.Answer;
 
@@ -65,7 +70,7 @@
                         <div class="options">
                             @foreach (var choice in question.Choices)
                             {
-                                bool isStudentChoice = hasStudentAnswer && choice.Id == studentChoiceId;
+                                bool isStudentChoice = hasStudentAnswer && studentChoiceId.HasValue && choice.Id == studentChoiceId.Value;
                                 bool isCorrectChoice = choice.ChoiceText == question.Answer;
                                 string optionClass = "";
 
@@ -107,3 +112,4 @@
         </a>
     </div>
 </div>
+ 

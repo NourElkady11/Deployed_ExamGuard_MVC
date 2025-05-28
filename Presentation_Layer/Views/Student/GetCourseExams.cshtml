@@ -13,6 +13,9 @@
                 bool examCompleted = studentExams != null && studentExams.ContainsKey(exam.Id) &&
                 studentExams[exam.Id].Status == "Completed";
 
+                bool examStarted = studentExams != null && studentExams.ContainsKey(exam.Id) &&
+                studentExams[exam.Id].Status == "Started";
+
                 <div class="col-lg-4 col-md-6 mb-4">
                     <div class="card h-100 shadow-sm">
                         <div class="card-header bg-primary text-white">
@@ -43,6 +46,15 @@
                                     </span>
                                 </div>
                             }
+                            @if (examStarted && !examCompleted)
+                            {
+                                <div class="mb-2">
+                                    <strong>Status:</strong>
+                                    <span class="badge bg-warning text-dark">
+                                        Exam Opened
+                                    </span>
+                                </div>
+                            }
                         </div>
                         <div class="card-footer bg-white border-top-0">
                             @if (examCompleted)
@@ -52,11 +64,17 @@
                                     <i class="bi bi-eye"></i> Review Exam
                                 </a>
                             }
+                            else if (examStarted)
+                            {
+                                <button disabled class="btn btn-warning w-100">
+                                    <i class="bi bi-exclamation-triangle"></i> Exam Opened
+                                </button>
+                            }
                             else
                             {
                                 <a asp-action="GoToExam" asp-controller="Student" asp-route-examId="@exam.Id"
                                    class="btn btn-success w-100">
-                                     Start Exam
+                                    Start Exam
                                 </a>
                             }
                         </div>
