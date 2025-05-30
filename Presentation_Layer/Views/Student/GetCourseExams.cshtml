@@ -3,6 +3,77 @@
     ViewData["Title"] = "Course Exams";
     var studentExams = ViewBag.StudentExams as Dictionary<int, Data.Models.StudentExam>;
 }
+
+<!-- Exam Instructions Modal -->
+<div class="modal fade" id="examInstructionsModal" tabindex="-1" aria-labelledby="examInstructionsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="examInstructionsModalLabel">
+                    <i class="bi bi-exclamation-triangle"></i> Exam Instructions - Please Read Carefully
+                </h5>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <h6><strong>IMPORTANT ANTI-CHEATING NOTICE:</strong></h6>
+                    <ul class="mb-0">
+                        <li><strong>Do NOT use any mobile phones, smartphones, or electronic devices</strong></li>
+                        <li><strong>Do NOT switch between browser tabs or windows</strong></li>
+                        <li><strong>Do NOT open ChatGPT, Google, or any other websites</strong></li>
+                        <li><strong>Do NOT use any external tools or applications</strong></li>
+                    </ul>
+                </div>
+
+                <div class="alert alert-info">
+                    <h6><strong>MONITORING SYSTEM:</strong></h6>
+                    <p class="mb-2">This exam is monitored by an advanced proctoring system that tracks:</p>
+                    <ul class="mb-0">
+                        <li>Tab switching and window changes</li>
+                        <li>Copy/paste activities</li>
+                        <li>Time spent on each question</li>
+                        <li>Any suspicious behavior patterns</li>
+                    </ul>
+                </div>
+
+                <div class="alert alert-warning">
+                    <h6><strong>VIOLATION CONSEQUENCES:</strong></h6>
+                    <p class="mb-0">Any detected cheating behavior will result in:</p>
+                    <ul class="mb-0">
+                        <li>Automatic exam submission</li>
+                        <li>Report to academic authorities</li>
+                        <li>Potential exam disqualification</li>
+                    </ul>
+                </div>
+
+                <div class="mt-3">
+                    <h6><strong>EXAM GUIDELINES:</strong></h6>
+                    <ul>
+                        <li>Read each question carefully before answering</li>
+                        <li>You can navigate between questions using the navigation panel</li>
+                        <li>Make sure to save your answers before moving to the next question</li>
+                        <li>Monitor your remaining time displayed at the top of the screen</li>
+                        <li>Submit your exam before time runs out</li>
+                        <li>Once submitted, you cannot make any changes</li>
+                    </ul>
+                </div>
+
+                <div class="form-check mt-4">
+                    <input class="form-check-input" type="checkbox" id="agreeToTerms">
+                    <label class="form-check-label" for="agreeToTerms">
+                        <strong>I have read and understood all the instructions above and agree to comply with the exam rules</strong>
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="beginExamBtn" disabled>
+                    <i class="bi bi-play-circle"></i> Begin Exam
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="container mt-4">
     <h2>Exams for Course</h2>
     @if (Model.Any())
@@ -15,6 +86,10 @@
 
                 bool examStarted = studentExams != null && studentExams.ContainsKey(exam.Id) &&
                 studentExams[exam.Id].Status == "Started";
+
+                // Check if exam date is today or in the past (DateOnly comparison)
+                bool isExamAvailable = exam.Date <= DateOnly.FromDateTime(DateTime.Now);
+                bool isUpcoming = exam.Date > DateOnly.FromDateTime(DateTime.Now);
 
                 <div class="col-lg-4 col-md-6 mb-4">
                     <div class="card h-100 shadow-sm">
@@ -55,6 +130,15 @@
                                     </span>
                                 </div>
                             }
+                            @if (isUpcoming && !examCompleted && !examStarted)
+                            {
+                                <div class="mb-2">
+                                    <strong>Status:</strong>
+                                    <span class="badge bg-info">
+                                        Upcoming
+                                    </span>
+                                </div>
+                            }
                         </div>
                         <div class="card-footer bg-white border-top-0">
                             @if (examCompleted)
@@ -70,12 +154,17 @@
                                     <i class="bi bi-exclamation-triangle"></i> Exam Opened
                                 </button>
                             }
+                            else if (isUpcoming)
+                            {
+                                <button disabled class="btn btn-info w-100" title="Exam not available yet">
+                                    <i class="bi bi-clock"></i> Upcoming
+                                </button>
+                            }
                             else
                             {
-                                <a asp-action="GoToExam" asp-controller="Student" asp-route-examId="@exam.Id"
-                                   class="btn btn-success w-100">
-                                    Start Exam
-                                </a>
+                                <button class="btn btn-success w-100 start-exam-btn" data-exam-id="@exam.Id">
+                                    <i class="bi bi-play-circle"></i> Start Exam
+                                </button>
                             }
                         </div>
                     </div>
@@ -91,3 +180,81 @@
         </div>
     }
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const startExamButtons = document.querySelectorAll('.start-exam-btn');
+        const modal = new bootstrap.Modal(document.getElementById('examInstructionsModal'));
+        const agreeCheckbox = document.getElementById('agreeToTerms');
+        const beginExamBtn = document.getElementById('beginExamBtn');
+        let currentExamId = null;
+
+        // Handle start exam button clicks
+        startExamButtons.forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                currentExamId = this.getAttribute('data-exam-id');
+
+                // Reset modal state
+                agreeCheckbox.checked = false;
+                beginExamBtn.disabled = true;
+
+                // Show the modal
+                modal.show();
+            });
+        });
+
+        // Handle agreement checkbox
+        agreeCheckbox.addEventListener('change', function () {
+            beginExamBtn.disabled = !this.checked;
+        });
+
+        // Handle begin exam button
+        beginExamBtn.addEventListener('click', function () {
+            if (currentExamId && agreeCheckbox.checked) {
+                // Redirect to GoToExam action
+                window.location.href = '@Url.Action("GoToExam", "Student")?examId=' + currentExamId;
+            }
+        });
+
+        // Prevent modal from closing when clicking outside if checkbox is not checked
+        document.getElementById('examInstructionsModal').addEventListener('hide.bs.modal', function (e) {
+            if (!agreeCheckbox.checked && e.target === this) {
+                // Allow closing with cancel button or ESC key
+                return true;
+            }
+        });
+    });
+</script>
+
+<style>
+    .card {
+        transition: transform 0.2s ease-in-out;
+    }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+    .badge {
+        font-size: 0.85em;
+    }
+
+    .modal-body ul {
+        padding-left: 1.2rem;
+    }
+
+    .modal-body li {
+        margin-bottom: 0.3rem;
+    }
+
+    .form-check-label {
+        font-size: 0.95rem;
+    }
+
+    @@media (max-width: 768px) {
+        .modal-dialog {
+            margin: 1rem;
+        }
+    }
+</style>

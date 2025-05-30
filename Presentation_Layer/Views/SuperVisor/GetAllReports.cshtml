@@ -44,7 +44,7 @@
                                 <th>Exam Subject</th>
                                 <th>Exam Code</th>
                                 <th>Date</th>
-                                <th>Total Reports</th>
+                               @*  <th>Total Reports</th> *@
                                 <th>Students Involved</th>
                                 <th>Top Detection Types</th>
                                 <th>Actions</th>
@@ -57,7 +57,7 @@
                                     <td>@summary.Exam.Subject</td>
                                     <td>@summary.Exam.Code</td>
                                     <td>@summary.Exam.Date.ToString("yyyy-MM-dd")</td>
-                                    <td>@summary.ReportCount</td>
+                                   @*  <td>@summary.ReportCount</td> *@
                                     <td>@summary.StudentsWithReports</td>
                                     <td>
                                         @foreach (var detection in summary.TopDetectionTypes)
