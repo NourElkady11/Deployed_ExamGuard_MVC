@@ -7,13 +7,16 @@ namespace Presentation_Layer.ViewModels
 	public class RegisterViewModel
 	{
 		[Required(ErrorMessage = "First name is required")]
-		public string FirstName { get; set; }
+        [RegularExpression(@"^(?=.*[a-zA-Z].*[a-zA-Z].*[a-zA-Z]).+$", ErrorMessage = "First name must contain at least 3 letters")]
+        public string FirstName { get; set; }
 
 		[Required(ErrorMessage = "Last name is required")]
-		public string LastName { get; set; }
+        [RegularExpression(@"^(?=.*[a-zA-Z].*[a-zA-Z].*[a-zA-Z]).+$", ErrorMessage = "Last name must contain at least 3 letters")]
+        public string LastName { get; set; }
 
 		[Required(ErrorMessage = "Username is required")]
-		public string Username { get; set; }
+        [RegularExpression(@"^(?=.*[a-zA-Z].*[a-zA-Z].*[a-zA-Z]).+$", ErrorMessage = "Username name must contain at least 3 letters")]
+        public string Username { get; set; }
 
 		[EmailAddress]
 		public string Email { get; set; }
