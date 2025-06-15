@@ -423,7 +423,6 @@
         const form = document.getElementById('examForm');
         const formData = new FormData(form);
         const examData = Object.fromEntries(formData.entries());
-
         try {
             const response = await fetch(`/Student/SubmitExam?examId=${examId}`, {
                 method: 'POST',
