@@ -85,7 +85,6 @@ namespace Presentation_Layer
                 options.Cookie.SecurePolicy = CookieSecurePolicy.None; 
                 options.LoginPath = "/Account/Login";
                 options.AccessDeniedPath = "/Account/AccessDenied";
-
                 // ✅ These settings ensure cookies persist
                 options.Cookie.SameSite = SameSiteMode.Lax; // Allows authentication across pages
                 options.Cookie.IsEssential = true; // Ensures authentication cookies are always sent

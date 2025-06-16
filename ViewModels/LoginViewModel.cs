@@ -12,6 +12,6 @@ namespace Presentation_Layer.ViewModels
 		public string Password { get; set; }
 
 		public bool RememberMe { get; set; }
-	
+
 	}
 }

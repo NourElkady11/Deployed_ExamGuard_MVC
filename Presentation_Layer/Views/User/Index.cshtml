@@ -11,6 +11,7 @@
     </div>
     <div class="mt-2">
         <form class="row" asp-action="Index">
+             <span class="text-danger" asp-validation-summary="ModelOnly"></span> 
             <div class="col-10"><input placeholder="Email" name="Email" type="text" class="form-control" required></input></div>
             <div class="col-2"><button class="btn btn-info" type="submit" value="search">Search</button></div>
         </form>
@@ -66,7 +67,7 @@
 else
 {
     <div class="mt-3 alert-warining">
-        <h2 class="bg-warning">No Employees yet</h2>
+        <h2 class="bg-warning">No Users exist</h2>
     </div>
 }
 

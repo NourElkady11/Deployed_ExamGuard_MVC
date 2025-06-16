@@ -42,7 +42,8 @@ namespace Presentation_Layer.Controllers
 				var user = await userManager.FindByEmailAsync(EmailTrimed);
 				if (user is null)
 				{
-					return View(Enumerable.Empty<UserViewModel>);
+					ModelState.AddModelError(string.Empty, "User not found with the provided email address.");
+					return View(Enumerable.Empty<UserViewModel>());
 				}
 
 				List<UserViewModel> userViewModels = new List<UserViewModel>();

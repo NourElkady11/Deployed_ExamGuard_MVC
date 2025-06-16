@@ -89,7 +89,6 @@ namespace Presentation_Layer.Controllers
                      await unitOfWork.SaveChangesAsync();
                       
 
-
 					if (result.Succeeded)
                     {
                         var roleResult = await userManager.AddToRoleAsync(user,"Student");
@@ -146,7 +145,7 @@ namespace Presentation_Layer.Controllers
                 {
                     if (userManager.CheckPasswordAsync(user, loginViewModel.Password).Result)
                     {
-                        var result = signInManager.PasswordSignInAsync(user, loginViewModel.Password, loginViewModel.RememberMe, false).Result;
+                        var result = signInManager.PasswordSignInAsync(user, loginViewModel.Password,loginViewModel.RememberMe, false).Result;
                         if (result.Succeeded)
                         {
                             HttpContext.Session.SetString("UserEmail", loginViewModel.Email);
