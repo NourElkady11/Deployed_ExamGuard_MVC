@@ -8,8 +8,6 @@
 	<div class="agileits-top">
 		<form action="Login" method="post">
 @* 			<div asp-validation-summary="All"></div> *@
-
-	
 			<input asp-for="Email" placeholder="Email" required="">
 			<span class="text-danger" asp-validation-for="Email"></span>
 			
@@ -26,11 +24,11 @@
 			</div> *@
 			<input type="submit" value="Login">
 		@* 	<p><a asp-action="GoogleLogin">Login with your Google Account</a></p> *@
-		</form>
 		<br/>
 		<p> Dont have an Account? <a asp-action="Register">Register Now </a></p>
 		<br/>
-		<p><a asp-action="ForgetPassword">ForgetPassword !</a></p>
+		<p><a href="@Url.Action("ForgetPassword", "Account")">ForgetPassword !</a></p>
+		</form>
 	</div>
 </div>
 

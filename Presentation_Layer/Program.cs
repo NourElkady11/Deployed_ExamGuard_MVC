@@ -52,17 +52,18 @@ namespace Presentation_Layer
 
 
             //AddDefaultTokenProviders==> is for providing the tokens for ForgetPassword and add the defult asccces denied path in the authorization proccess
-            /*builder.Services.AddAuthentication(option =>
+            builder.Services.AddAuthentication(option =>
             {
-                option.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+          /*      option.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 option.DefaultAuthenticateScheme = GoogleDefaults.AuthenticationScheme;
-                option.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+                option.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;*/
             }).AddGoogle(options =>
             {
                 IConfiguration GoogleAuth = builder.Configuration.GetSection("Authentication:Google");
                 options.ClientId = GoogleAuth["ClientId"];
                 options.ClientSecret = GoogleAuth["ClientSecret"];
-            }).AddJwtBearer("Bearer", options =>
+            });
+/*            }).AddJwtBearer("Bearer", options =>
             {
                 options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                 {
@@ -77,23 +78,34 @@ namespace Presentation_Layer
             });*/
 
 
+            /*    builder.Services.ConfigureApplicationCookie(options =>
+				{
+					options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+					options.SlidingExpiration = true;
+					options.Cookie.HttpOnly = true; 
+					options.Cookie.SecurePolicy = CookieSecurePolicy.None; 
+					options.LoginPath = "/Account/Login";
+					options.AccessDeniedPath = "/Account/AccessDenied";
+					// ✅ These settings ensure cookies persist
+					options.Cookie.SameSite = SameSiteMode.Lax; // Allows authentication across pages
+					options.Cookie.IsEssential = true; // Ensures authentication cookies are always sent
+				});*/
+
+
             builder.Services.ConfigureApplicationCookie(options =>
-            {
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-                options.SlidingExpiration = true;
-                options.Cookie.HttpOnly = true; 
-                options.Cookie.SecurePolicy = CookieSecurePolicy.None; 
-                options.LoginPath = "/Account/Login";
-                options.AccessDeniedPath = "/Account/AccessDenied";
-                // ✅ These settings ensure cookies persist
-                options.Cookie.SameSite = SameSiteMode.Lax; // Allows authentication across pages
-                options.Cookie.IsEssential = true; // Ensures authentication cookies are always sent
-            });
+			{
+				options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+				options.SlidingExpiration = true;
+				options.Cookie.HttpOnly = true;
+				options.Cookie.SecurePolicy = CookieSecurePolicy.None;
+				options.LoginPath = "/Account/Login";
+				options.AccessDeniedPath = "/Account/AccessDenied";
+				options.Cookie.SameSite = SameSiteMode.Lax;
+				options.Cookie.IsEssential = true;
+			});
 
 
-
-
-            var app = builder.Build();
+			var app = builder.Build();
             
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())

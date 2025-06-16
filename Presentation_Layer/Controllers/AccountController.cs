@@ -215,7 +215,7 @@ namespace Presentation_Layer.Controllers
         }
 
 
-        [HttpPost]
+   /*     [HttpPost]
         public IActionResult ForgetPassword(ForgetPasswordViewModel forgetPasswordViewModel)
         {
             if (!ModelState.IsValid)
@@ -253,7 +253,10 @@ namespace Presentation_Layer.Controllers
             }
             return View(forgetPasswordViewModel);
 
-        }
+        }*/
+
+
+
 
         public IActionResult ResetPassword(string email, string token)
         {

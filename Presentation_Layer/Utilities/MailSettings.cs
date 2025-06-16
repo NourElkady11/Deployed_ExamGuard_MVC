@@ -21,6 +21,7 @@ namespace Presentation_Layer.Utilities
 			//Create SMTP Client
 			var client = new SmtpClient("smtp.gmail.com", 587);
 			client.EnableSsl = true;
+			client.UseDefaultCredentials = false;
 			//Create Network credintials
 			client.Credentials= new NetworkCredential("nourel2ady11@gmail.com", "dsayrujvcwdvxmhn");
 			client.Send("nourel2ady11@gmail.com", email.Recipent, email.Subject, email.body);

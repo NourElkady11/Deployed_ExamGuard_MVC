@@ -19,6 +19,9 @@
                 var path = context.Request.Path.Value?.ToLower();
                 if (path != null &&
                     !path.Equals("/") &&
+                    !path.Equals("/account/forgetpassword")&&
+                    !path.Equals("/account/resetpassword") &&
+                    !path.Equals("/account/checkyourinbox") &&
                     !path.StartsWith("/account/login") &&
                     !path.StartsWith("/account/register") &&
                     !path.StartsWith("/home/welcome") &&
