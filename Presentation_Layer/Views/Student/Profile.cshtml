@@ -37,11 +37,11 @@
         </div>
 
         <div class="profile-actions">
-            <a href="@Url.Action("EditProfile", "Student")" class="btn btn-primary">
+@*             <a href="@Url.Action("EditProfile", "Student")" class="btn btn-primary">
                 <i class="fas fa-edit"></i> Edit Profile
-            </a>
+            </a> *@
             @{
-                if (User.IsInRole("Studnet"))
+                if (!User.IsInRole("Admin") && !User.IsInRole("SuperVisor"))
                 {
                     <a href="@Url.Action("GetAllGrades", "Student")" class="btn btn-info">
                         <i class="fas fa-graduation-cap"></i> View Grades
