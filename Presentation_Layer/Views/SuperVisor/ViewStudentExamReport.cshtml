@@ -22,6 +22,7 @@
                                 <th>Incident #</th>
                                 <th>Detection Type</th>
                                 <th>Time</th>
+                                <th>Additional Info</th>
                                 <th>Evidence</th>
                             </tr>
                         </thead>
@@ -33,14 +34,38 @@
                                     <tr>
                                         <td>@counter</td>
                                         <td>
-                                            <span class="badge bg-danger">@report.DetectionType</span>
+                                            @if (report.DetectionType == "Tab Switching")
+                                            {
+                                                <span class="badge bg-warning">@report.DetectionType</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">@report.DetectionType</span>
+                                            }
                                         </td>
                                         <td>@report.DetectionTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
                                         <td>
-                                            <a href="/SuperVisor/ViewReportImage?imagePath=@report.ImagePath"
-                                               class="btn btn-sm btn-secondary" target="_blank">
-                                                View Image
-                                            </a>
+                                            @if (report.DetectionType == "Tab Switching" && report.TabSwitchCount.HasValue)
+                                            {
+                                                <small class="text-muted">Violation #@report.TabSwitchCount</small>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">-</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(report.ImagePath))
+                                            {
+                                                <a href="/SuperVisor/ViewReportImage?imagePath=@report.ImagePath"
+                                                   class="btn btn-sm btn-secondary" target="_blank">
+                                                    View Image
+                                                </a>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">No image</span>
+                                            }
                                         </td>
                                     </tr>
                                     counter++;
@@ -61,7 +86,14 @@
                     <ul>
                         @foreach (var item in detectionSummary)
                         {
-                            <li><strong>@item.DetectionType:</strong> Detected @item.Count times</li>
+                            @if (item.DetectionType == "Tab Switching")
+                            {
+                                <li><strong>@item.DetectionType:</strong> @item.Count violations recorded</li>
+                            }
+                            else
+                            {
+                                <li><strong>@item.DetectionType:</strong> Detected @item.Count times</li>
+                            }
                         }
                     </ul>
                 </div>

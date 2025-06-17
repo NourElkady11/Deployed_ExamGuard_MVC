@@ -217,6 +217,7 @@
                 visibilityViolations++;
                 showDetectionAlert(`Tab switching detected! (Violation #${visibilityViolations}) - Keep in your Tab!`);
 
+                recordTabSwitch(examId, visibilityViolations);
                 // If 3 or more violations, auto-submit immediately
                 if (visibilityViolations >= 3) {
                     submitExam(false, "Auto-submitted due to multiple tab switching violations");
@@ -226,6 +227,7 @@
                 }
             }
         });
+  
 
         // Detect focus loss (switching to another application)
         window.addEventListener('blur', function () {
@@ -407,6 +409,23 @@
             }
         }
         pollDetections();
+    }
+
+    async function recordTabSwitch(examId, violationCount) {
+        try {
+            await fetch('/Student/RecordTabSwitch', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    examId: examId,
+                    violationCount: violationCount
+                })
+            });
+        } catch (error) {
+            console.error('Error recording tab switch:', error);
+        }
     }
 
     async function submitExam(isTimeUp, reason) {

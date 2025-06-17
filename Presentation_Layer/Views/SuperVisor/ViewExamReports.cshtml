@@ -21,6 +21,7 @@
                                 <th>Student Name</th>
                                 <th>Email</th>
                                 <th>Detection Types</th>
+                                <th>Tab Switches</th>
                                 <th>Total Detections</th>
                                 <th>Actions</th>
                             </tr>
@@ -34,9 +35,31 @@
                                     <td>
                                         @foreach (var detection in summary.DetectionCounts)
                                         {
-                                            <span class="badge bg-danger me-1">
-                                                @detection.DetectionType: @detection.Count times
-                                            </span>
+                                            @if (detection.DetectionType == "Tab Switching")
+                                            {
+                                                <span class="badge bg-warning me-1">
+                                                    @detection.DetectionType: @detection.Count violations
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger me-1">
+                                                    @detection.DetectionType: @detection.Count times
+                                                </span>
+                                            }
+                                        }
+                                    </td>
+                                    <td>
+                                        @{
+                                            var tabSwitchCount = summary.DetectionCounts.FirstOrDefault(d => d.DetectionType == "Tab Switching")?.Count ?? 0;
+                                        }
+                                        @if (tabSwitchCount > 0)
+                                        {
+                                            <span class="badge bg-warning">@tabSwitchCount violations</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">None</span>
                                         }
                                     </td>
                                     <td>@summary.TotalDetections</td>

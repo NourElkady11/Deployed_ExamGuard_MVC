@@ -118,7 +118,46 @@ namespace Presentation_Layer.Controllers
             return View(exam); 
         }
 
-        public async Task<IActionResult> ReviewExam(int examId)
+		[HttpPost]
+		public async Task<IActionResult> RecordTabSwitch([FromBody] TabSwitchData tabSwitchData)
+		{
+			try
+			{
+				var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email);
+				var studentName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+				var student = await unitOfWork.StudentsRepo.GetStudentWithEmail(email.Value);
+				var studentId = student.Id;
+
+				var report = new CheatingReport
+				{
+					StudentId = studentId,
+					ExamId = tabSwitchData.ExamId,
+					StudentName = studentName,
+					StudentEmail = email.Value,
+					DetectionTime = DateTime.Now,
+					DetectionType = "Tab Switching",
+					TabSwitchCount = tabSwitchData.ViolationCount,
+					ImagePath = null // No image for tab switching
+				};
+
+				await unitOfWork.CheatingReportRepository.CreateAsync(report);
+				await unitOfWork.SaveChangesAsync();
+
+				return Json(new { success = true });
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, $"Error recording tab switch: {ex.Message}");
+			}
+		}
+
+		public class TabSwitchData
+		{
+			public int ExamId { get; set; }
+			public int ViolationCount { get; set; }
+		}
+
+		public async Task<IActionResult> ReviewExam(int examId)
         {
             var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email);
             var student = await unitOfWork.StudentsRepo.GetStudentWithEmail(email.Value);
