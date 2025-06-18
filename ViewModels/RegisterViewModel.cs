@@ -16,6 +16,7 @@ namespace Presentation_Layer.ViewModels
 
 		[Required(ErrorMessage = "Username is required")]
         [RegularExpression(@"^(?=.*[a-zA-Z].*[a-zA-Z].*[a-zA-Z]).+$", ErrorMessage = "Username name must contain at least 3 letters")]
+	
         public string Username { get; set; }
 
 		[EmailAddress]

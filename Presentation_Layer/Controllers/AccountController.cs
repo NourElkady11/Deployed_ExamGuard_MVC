@@ -26,6 +26,11 @@ namespace Presentation_Layer.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel registerViewModel)
         {
+            var existingUser = await userManager.FindByNameAsync(registerViewModel.Username);
+            if (existingUser != null)
+            {
+                ModelState.AddModelError("Username", "Username is already taken");
+            }
             if (!System.Text.RegularExpressions.Regex.IsMatch(registerViewModel.Phone, @"^(010|011|012|015)\d{8}$"))
             {
                 ModelState.AddModelError("Phone", "Invalid phone number format.");
@@ -139,7 +144,7 @@ namespace Presentation_Layer.Controllers
             }
             else
             {
-             
+
                 var user = userManager.FindByEmailAsync(loginViewModel.Email).Result;
                 if (user is not null)
                 {
@@ -154,7 +159,6 @@ namespace Presentation_Layer.Controllers
                                 new Claim(ClaimTypes.Name, user.Firstname),
                                 new Claim(ClaimTypes.Email,user.Email)
                             };
-
 
                             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                             var principal = new ClaimsPrincipal(identity);
@@ -184,7 +188,6 @@ namespace Presentation_Layer.Controllers
                     else
                     {
                         ModelState.AddModelError("Password", "Incorrect Email or Password");
-
 
                     }
                 }

@@ -65,8 +65,8 @@ namespace Presentation_Layer
             });
 /*            }).AddJwtBearer("Bearer", options =>
             {
-                options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-                {
+                options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParametershttps://localhost:44378/Files/Images/Cheating-in-Exams.jpg
+                {https://localhost:44378/Files/Images/Cheating-in-Exams.jpg
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateIssuerSigningKey = true,
