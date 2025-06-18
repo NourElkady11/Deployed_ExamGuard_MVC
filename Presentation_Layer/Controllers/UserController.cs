@@ -126,7 +126,6 @@ namespace Presentation_Layer.Controllers
 			return View();
 		}
 
-
 		[HttpPost]
 		public async Task<IActionResult> Edit(string id, UserViewModel userViewModel)
 		{
