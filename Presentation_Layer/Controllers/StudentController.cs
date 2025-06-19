@@ -81,7 +81,6 @@ namespace Presentation_Layer.Controllers
                     CourseCode = course.Code,
                     Exams = new List<ExamGradeViewModel>()
                 };
-
                 // Add exam details
                 foreach (var exam in courseExams)
                 {
