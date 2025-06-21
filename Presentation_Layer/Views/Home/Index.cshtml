@@ -12,7 +12,7 @@
         <div class="col-md-6">
             <h1 class="fw-bold text-primary">Welcome to ExamGuard</h1>
             <p class="lead">The most advanced AI-powered online exam system with secure monitoring to ensure a fair Exam environment</p>
-            @if (User.IsInRole("Admin"))
+            @if (User.IsInRole("Doctor"))
             {
                 <div class="d-flex flex-wrap gap-2">
                     <a href="/User/Index" class="btn btn-primary btn-lg">Manage Users</a>

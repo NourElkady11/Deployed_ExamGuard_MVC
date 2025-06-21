@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Presentation_Layer.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Doctor")]
     public class CourseController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -116,7 +116,6 @@ namespace Presentation_Layer.Controllers
                     return NotFound();
                 }
 
-            
                 course.Name = courseViewModel.Name;
                 course.Code = courseViewModel.Code;
                 course.SuperVisorId = courseViewModel.SuperVisorId;

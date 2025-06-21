@@ -12,8 +12,14 @@ using ViewModels;
 
 namespace Presentation_Layer.Controllers
 {
-    public class StudentController(HttpClient _httpClient,IUnitOfWork unitOfWork,IMapper mapper) : Controller
+    public class StudentController(HttpClient _httpClient, IUnitOfWork unitOfWork, IMapper mapper) : Controller
     {
+
+        private static Dictionary<int, int> behavioralViolations = new Dictionary<int, int>();
+        private const int MAX_BEHAVIORAL_VIOLATIONS = 10;
+        private static Dictionary<int, Dictionary<string, DateTime>> lastDetectionTimes = new Dictionary<int, Dictionary<string, DateTime>>();
+        private const int DETECTION_COOLDOWN_SECONDS = 3;
+
         [Authorize(Roles = "Student")]
         public async Task<IActionResult> Index()
         {
@@ -24,10 +30,10 @@ namespace Presentation_Layer.Controllers
         public async Task<IActionResult> GetCourseExams(int courseid)
         {
             var exams = await unitOfWork.ExamRepository.GetCourseExamsAsync(courseid);
-            var email=User.FindFirst(System.Security.Claims.ClaimTypes.Email);
+            var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email);
             var student = await unitOfWork.StudentsRepo.GetStudentWithEmail(email.Value);
             var userId = student.Id;
-         /*   var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);*/
+            /*   var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);*/
 
             var studentExams = await unitOfWork.StudentExamRepository.GetStudentExamsAsync(userId);
             ViewBag.StudentExams = studentExams.ToDictionary(se => se.ExamId, se => se);
@@ -47,13 +53,13 @@ namespace Presentation_Layer.Controllers
                 return NotFound("Student not found.");
             }
 
-          
+
             var studentExams = await unitOfWork.StudentExamRepository.GetStudentExamsAsync(student.Id);
 
-         
+
             var studentCourses = await unitOfWork.CoursesRepo.GetCourseWithExamssAsync();
 
-            
+
             var viewModel = new StudentGradesViewModel
             {
                 StudentId = student.Id,
@@ -114,49 +120,49 @@ namespace Presentation_Layer.Controllers
         {
             var exam = await unitOfWork.ExamRepository.GetExamWithQuestionsAndChoicesAsync(examId);
             ViewData["ExamId"] = examId;
-            return View(exam); 
+            return View(exam);
         }
 
-		[HttpPost]
-		public async Task<IActionResult> RecordTabSwitch([FromBody] TabSwitchData tabSwitchData)
-		{
-			try
-			{
-				var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email);
-				var studentName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
-				var student = await unitOfWork.StudentsRepo.GetStudentWithEmail(email.Value);
-				var studentId = student.Id;
+        [HttpPost]
+        public async Task<IActionResult> RecordTabSwitch([FromBody] TabSwitchData tabSwitchData)
+        {
+            try
+            {
+                var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email);
+                var studentName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+                var student = await unitOfWork.StudentsRepo.GetStudentWithEmail(email.Value);
+                var studentId = student.Id;
 
-				var report = new CheatingReport
-				{
-					StudentId = studentId,
-					ExamId = tabSwitchData.ExamId,
-					StudentName = studentName,
-					StudentEmail = email.Value,
-					DetectionTime = DateTime.Now,
-					DetectionType = "Tab Switching",
-					TabSwitchCount = tabSwitchData.ViolationCount,
-					ImagePath = null // No image for tab switching
-				};
+                var report = new CheatingReport
+                {
+                    StudentId = studentId,
+                    ExamId = tabSwitchData.ExamId,
+                    StudentName = studentName,
+                    StudentEmail = email.Value,
+                    DetectionTime = DateTime.Now,
+                    DetectionType = "Tab Switching",
+                    TabSwitchCount = tabSwitchData.ViolationCount,
+                    ImagePath = null // No image for tab switching
+                };
 
-				await unitOfWork.CheatingReportRepository.CreateAsync(report);
-				await unitOfWork.SaveChangesAsync();
+                await unitOfWork.CheatingReportRepository.CreateAsync(report);
+                await unitOfWork.SaveChangesAsync();
 
-				return Json(new { success = true });
-			}
-			catch (Exception ex)
-			{
-				return StatusCode(500, $"Error recording tab switch: {ex.Message}");
-			}
-		}
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error recording tab switch: {ex.Message}");
+            }
+        }
 
-		public class TabSwitchData
-		{
-			public int ExamId { get; set; }
-			public int ViolationCount { get; set; }
-		}
+        public class TabSwitchData
+        {
+            public int ExamId { get; set; }
+            public int ViolationCount { get; set; }
+        }
 
-		public async Task<IActionResult> ReviewExam(int examId)
+        public async Task<IActionResult> ReviewExam(int examId)
         {
             var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email);
             var student = await unitOfWork.StudentsRepo.GetStudentWithEmail(email.Value);
@@ -176,7 +182,7 @@ namespace Presentation_Layer.Controllers
             {
                 Exam = exam,
                 StudentExam = studentExam,
-                StudentAnswers = studentAnswers.ToDictionary(sa => sa.QuestionId, sa => sa.ChoiceId) 
+                StudentAnswers = studentAnswers.ToDictionary(sa => sa.QuestionId, sa => sa.ChoiceId)
             };
 
             return View(reviewViewModel);
@@ -203,32 +209,64 @@ namespace Presentation_Layer.Controllers
                         var student = await unitOfWork.StudentsRepo.GetStudentWithEmail(email.Value);
                         var studentId = student.Id;
 
+                        // Initialize detection tracking for this student if not exists
+                        if (!lastDetectionTimes.ContainsKey(studentId))
+                        {
+                            lastDetectionTimes[studentId] = new Dictionary<string, DateTime>();
+                        }
+
                         foreach (var detection in detectionData.detections)
                         {
                             var label = detection.label.ToString();
                             var timestamp = DateTime.Parse(detection.timestamp.ToString());
                             var snapshotFile = detection.snapshot.ToString();
 
-                            // Create a new cheating report
-                            var report = new CheatingReport
+                            // Check if enough time has passed since the last detection of this type
+                            bool shouldRecord = true;
+                            if (lastDetectionTimes[studentId].ContainsKey(label))
                             {
-                                StudentId = studentId,
-                                ExamId = examId,
-                                StudentName = studentName,
-                                StudentEmail = email.Value,
-                                DetectionTime = timestamp,
-                                DetectionType = label,
-                                ImagePath = snapshotFile
-                            };
+                                var timeDifference = timestamp - lastDetectionTimes[studentId][label];
+                                if (timeDifference.TotalSeconds < DETECTION_COOLDOWN_SECONDS)
+                                {
+                                    shouldRecord = false;
+                                    Console.WriteLine($"Skipping duplicate detection: {label} - Time difference: {timeDifference.TotalSeconds} seconds");
+                                }
+                            }
 
-                            await unitOfWork.CheatingReportRepository.CreateAsync(report);
-                            detections.Add(new { label = label });
+                            if (shouldRecord)
+                            {
+                                // Update the last detection time for this type
+                                lastDetectionTimes[studentId][label] = timestamp;
+
+                                // Create a new cheating report
+                                var report = new CheatingReport
+                                {
+                                    StudentId = studentId,
+                                    ExamId = examId,
+                                    StudentName = studentName,
+                                    StudentEmail = email.Value,
+                                    DetectionTime = timestamp,
+                                    DetectionType = label,
+                                    ImagePath = snapshotFile
+                                };
+
+                                await unitOfWork.CheatingReportRepository.CreateAsync(report);
+                                detections.Add(new
+                                {
+                                    label = label,
+                                    isBehavioral = IsBehavioralDetection(label),
+                                    imagePath = snapshotFile
+                                });
+                            }
                         }
 
-                        await unitOfWork.SaveChangesAsync();
+                        if (detections.Any()) // Only save if there are actual detections to save
+                        {
+                            await unitOfWork.SaveChangesAsync();
+                        }
                     }
 
-                    return Json(new { detections = detections.Select(d => d.label).ToList() });
+                    return Json(new { detections = detections });
                 }
                 else
                 {
@@ -239,6 +277,140 @@ namespace Presentation_Layer.Controllers
             {
                 return StatusCode(500, $"Error: {ex.Message}");
             }
+        }
+
+
+        private bool IsBehavioralDetection(string detectionType)
+        {
+            var behavioralTypes = new[] {
+                "Student Absence",
+                "Looking Away",
+                "Posture Change",
+                "Head Movement",
+                "Multiple Persons"
+            };
+            return behavioralTypes.Contains(detectionType);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RecordFocusLoss([FromBody] FocusLossData focusData)
+        {
+            try
+            {
+                var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email);
+                var studentName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+                var student = await unitOfWork.StudentsRepo.GetStudentWithEmail(email.Value);
+                var studentId = student.Id;
+
+                var report = new CheatingReport
+                {
+                    StudentId = studentId,
+                    ExamId = focusData.ExamId,
+                    StudentName = studentName,
+                    StudentEmail = email.Value,
+                    DetectionTime = DateTime.Now,
+                    DetectionType = "Focus Loss",
+                    ImagePath = focusData.ImagePath
+                };
+
+                await unitOfWork.CheatingReportRepository.CreateAsync(report);
+                await unitOfWork.SaveChangesAsync();
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error recording focus loss: {ex.Message}");
+            }
+        }
+
+        public class FocusLossData
+        {
+            public int ExamId { get; set; }
+            public string ImagePath { get; set; }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RecordBehavioralViolation([FromBody] BehavioralViolationData violationData)
+        {
+            try
+            {
+                var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email);
+                var studentName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+                var student = await unitOfWork.StudentsRepo.GetStudentWithEmail(email.Value);
+                var studentId = student.Id;
+
+                // Initialize detection tracking for this student if not exists
+                if (!lastDetectionTimes.ContainsKey(studentId))
+                {
+                    lastDetectionTimes[studentId] = new Dictionary<string, DateTime>();
+                }
+
+                // Check for duplicate detection
+                var currentTime = DateTime.Now;
+                bool shouldRecord = true;
+
+                if (lastDetectionTimes[studentId].ContainsKey(violationData.DetectionType))
+                {
+                    var timeDifference = currentTime - lastDetectionTimes[studentId][violationData.DetectionType];
+                    if (timeDifference.TotalSeconds < DETECTION_COOLDOWN_SECONDS)
+                    {
+                        shouldRecord = false;
+                    }
+                }
+
+                if (!shouldRecord)
+                {
+                    return Json(new { success = false, message = "Duplicate detection ignored" });
+                }
+
+                // Update the last detection time
+                lastDetectionTimes[studentId][violationData.DetectionType] = currentTime;
+
+                // Track violations per student
+                if (!behavioralViolations.ContainsKey(studentId))
+                {
+                    behavioralViolations[studentId] = 0;
+                }
+                behavioralViolations[studentId]++;
+
+                var report = new CheatingReport
+                {
+                    StudentId = studentId,
+                    ExamId = violationData.ExamId,
+                    StudentName = studentName,
+                    StudentEmail = email.Value,
+                    DetectionTime = currentTime,
+                    DetectionType = violationData.DetectionType,
+                    ImagePath = violationData.ImagePath
+                };
+
+                await unitOfWork.CheatingReportRepository.CreateAsync(report);
+                await unitOfWork.SaveChangesAsync();
+
+                // Check if max violations reached
+                bool shouldSubmit = behavioralViolations[studentId] >= MAX_BEHAVIORAL_VIOLATIONS;
+
+                return Json(new
+                {
+                    success = true,
+                    violationCount = behavioralViolations[studentId],
+                    shouldSubmit = shouldSubmit
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error recording behavioral violation: {ex.Message}");
+            }
+            
+        }
+
+
+        public class BehavioralViolationData
+        {
+            public int ExamId { get; set; }
+            public string DetectionType { get; set; }
+            public string ImagePath { get; set; }
         }
 
         [HttpPost]
@@ -264,8 +436,8 @@ namespace Presentation_Layer.Controllers
                 int totalQuestions = exam.Questions.Count;
 
 
-/*                await unitOfWork.StudentAnswerRepository.DeleteStudentExamAnswersAsync(userId, examId);
-*/
+                /*                await unitOfWork.StudentAnswerRepository.DeleteStudentExamAnswersAsync(userId, examId);
+                */
 
                 // Process each question and save the student's answers
                 foreach (var question in exam.Questions)
@@ -332,6 +504,20 @@ namespace Presentation_Layer.Controllers
         {
             try
             {
+                var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email);
+                var student = await unitOfWork.StudentsRepo.GetStudentWithEmail(email.Value);
+
+                // Clear detection tracking for this student
+                if (lastDetectionTimes.ContainsKey(student.Id))
+                {
+                    lastDetectionTimes[student.Id].Clear();
+                }
+
+                if (behavioralViolations.ContainsKey(student.Id))
+                {
+                    behavioralViolations.Remove(student.Id);
+                }
+
                 var response = await _httpClient.GetAsync("http://localhost:5000/stop_exam");
                 if (response.IsSuccessStatusCode)
                 {
@@ -346,9 +532,8 @@ namespace Presentation_Layer.Controllers
             {
                 return StatusCode(500, $"Error: {ex.Message}");
             }
-
-           
         }
+
 
         public async Task<IActionResult> ExamComplete()
         {

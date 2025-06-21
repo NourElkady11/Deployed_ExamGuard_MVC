@@ -27,20 +27,20 @@
                 {
                     questionCount++;
                     int pointsPerQuestion = exam.Questions.Count;
-                    <div class="question-block">
-                        <h3>Question @questionCount (@pointsPerQuestion points)</h3>
-                        <p>@question.QuestionText</p>
-                        <div class="options">
-                            @foreach (var choice in question.Choices)
+                                <div class="question-block">
+                                    <h3>Question @questionCount (@pointsPerQuestion points)</h3>
+                                    <p>@question.QuestionText</p>
+                                    <div class="options">
+                                        @foreach (var choice in question.Choices)
                             {
                                 string choiceId = $"q{question.Id}_{choice.Id}";
-                                <div class="option">
-                                    <input type="radio" id="@choiceId" name="q@(question.Id)" value="@choice.Id" required>
-                                    <label for="@choiceId">@choice.ChoiceText</label>
-                                </div>
+                                            <div class="option">
+                                                <input type="radio" id="@choiceId" name="q@(question.Id)" value="@choice.Id" required>
+                                                <label for="@choiceId">@choice.ChoiceText</label>
+                                            </div>
                             }
-                        </div>
-                    </div>
+                                    </div>
+                                </div>
                 }
             }
             <div class="exam-controls d-flex justify-content-end mt-4">
@@ -130,14 +130,28 @@
     let isSubmitting = false;
     let visibilityViolations = 0;
     let objectDetectionViolations = 0; // Track detection alerts
+    let behavioralViolations = 0;
     let leavingExamModal = null;
     let closingExamModal = null;
     let cheatingDetectedModal = null; // New modal for cheating detected
     let isHandlingCloseEvent = false;
     let hasChosenToStay = false; // Flag to track if user chose to stay
+    let lastDetectionTimes = {}; // Track last detection time for each type
+    const FRONTEND_COOLDOWN_MS = 1000;
+    let flag = 1;
 
+
+    const BEHAVIORAL_DETECTION_TYPES = [
+        'Student Absence',
+        'Looking Away',
+        'Posture Change',
+        'Looking Outside The Screen',
+        'Multiple Persons'
+    ];
     // Set up on page load - immediately activate all security measures
     document.addEventListener('DOMContentLoaded', function () {
+
+        lastDetectionTimes = {};
         // Initialize Bootstrap modals
         leavingExamModal = new bootstrap.Modal(document.getElementById('leavingExamModal'), {
             backdrop: 'static',
@@ -227,7 +241,7 @@
                 }
             }
         });
-  
+
 
         // Detect focus loss (switching to another application)
         window.addEventListener('blur', function () {
@@ -385,30 +399,146 @@
             try {
                 const response = await fetch(`/Student/GetDetectionResults?examId=${examId}`);
                 const data = await response.json();
-                if (data.detections && data.detections.length > 0) {
-                    data.detections.forEach(function (detection) {
-                        if (detection) {
-                            objectDetectionViolations++; // Increment violation counter
-                            showDetectionAlert(`Cheating Detected: ${detection}`);
 
-                            // If 5 or more violations, auto-submit immediately
-                            if (objectDetectionViolations >= 5 && isExamActive) {
-                                submitExam(false, "Auto-submitted due to multiple object detection violations");
-                                // Show a custom modal instead of default alert
-                                document.getElementById('cheatingMessage').textContent =
-                                    "Your exam has been automatically submitted due to multiple detected objects that are not allowed during exams. This behavior is considered cheating.";
-                                cheatingDetectedModal.show();
+                if (data.detections && data.detections.length > 0) {
+                    for (const detection of data.detections) {
+                        if (detection && detection.label) {
+                            const currentTime = Date.now();
+
+                            // Check if enough time has passed since the last detection of this type
+                            if (lastDetectionTimes[detection.label]) {
+                                const timeDifference = currentTime - lastDetectionTimes[detection.label];
+                                if (timeDifference < FRONTEND_COOLDOWN_MS) {
+                                    console.log(`Skipping duplicate frontend alert for: ${detection.label}`);
+                                    continue; // Skip this detection
+                                }
+                            }
+
+                            // Update the last detection time for this type
+                            lastDetectionTimes[detection.label] = currentTime;
+
+                            // Check if it's a behavioral detection using the flag or detection type
+                            const isBehavioral = detection.isBehavioral || BEHAVIORAL_DETECTION_TYPES.includes(detection.label);
+
+                            if (isBehavioral) {
+                                // Handle behavioral detection
+                                if (detection.label == "Looking Outside The Screen"){
+                                    if(flag==1){
+
+                                        flag = 0;
+
+                                        behavioralViolations++;
+                                        showDetectionAlert(`Behavioral Alert: ${detection.label} (${behavioralViolations}/15)`);
+
+                                        // Record behavioral violation
+
+                                        recordBehavioralViolation(examId, detection.label, detection.imagePath);
+                                    
+                                    }else if(flag==0){
+                                        flag = 1;
+                                        continue;
+                                    }
+                                }
+                                else{
+                                       behavioralViolations++;
+                                         showDetectionAlert(`Behavioral Alert: ${detection.label} (${behavioralViolations}/10)`);
+
+                                     // Record behavioral violation
+                                    await recordBehavioralViolation(examId, detection.label, detection.imagePath);
+                                }
+                             
+
+                                // Check if max behavioral violations reached
+                                if (behavioralViolations >= 15 && isExamActive) {
+                                    submitExam(false, "Auto-submitted due to multiple behavioral violations");
+                                    document.getElementById('cheatingMessage').textContent =
+                                        "Your exam has been automatically submitted due to multiple behavioral violations detected during the exam.";
+                                    cheatingDetectedModal.show();
+                                }
+                            } else {
+                                // Handle object detection
+                                objectDetectionViolations++;
+                                showDetectionAlert(`Object Detected: ${detection.label} (${objectDetectionViolations}/10)`);
+
+                                if (objectDetectionViolations >= 10 && isExamActive) {
+                                    submitExam(false, "Auto-submitted due to multiple object detection violations");
+                                    document.getElementById('cheatingMessage').textContent =
+                                        "Your exam has been automatically submitted due to multiple detected objects that are not allowed during exams.";
+                                    cheatingDetectedModal.show();
+                                }
                             }
                         }
-                    });
+                    }
                 }
-                setTimeout(() => pollDetections(), 1000);
+                setTimeout(() => pollDetections(), 200); // Increased polling interval to 2 seconds
             } catch (error) {
                 console.error("Error fetching detection results:", error);
-                setTimeout(() => pollDetections(), 1000);
+                setTimeout(() => pollDetections(), 200);
             }
         }
         pollDetections();
+    }
+
+    async function captureFocusLossScreenshot(examId) {
+        try {
+            const response = await fetch('http://localhost:5000/capture_focus_loss');
+            const data = await response.json();
+
+            if (data.detection && data.snapshot) {
+                // Record the focus loss with screenshot
+                await recordFocusLoss(examId, data.snapshot);
+            }
+        } catch (error) {
+            console.error('Error capturing focus loss screenshot:', error);
+            // Still record the focus loss even if screenshot fails
+            await recordFocusLoss(examId, null);
+        }
+    }
+
+    // Add this new function to record focus loss
+    async function recordFocusLoss(examId, imagePath) {
+        try {
+            await fetch('/Student/RecordFocusLoss', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    examId: examId,
+                    imagePath: imagePath
+                })
+            });
+        } catch (error) {
+            console.error('Error recording focus loss:', error);
+        }
+    }
+
+    async function recordBehavioralViolation(examId, detectionType, imagePath) {
+        try {
+            const response = await fetch('/Student/RecordBehavioralViolation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    examId: examId,
+                    detectionType: detectionType,
+                    imagePath: imagePath
+                })
+            });
+
+            const result = await response.json();
+
+            // Only proceed if the backend actually recorded the violation
+            if (result.success && result.shouldSubmit && isExamActive) {
+                submitExam(false, "Auto-submitted due to maximum behavioral violations reached");
+                document.getElementById('cheatingMessage').textContent =
+                    "Your exam has been automatically submitted due to reaching the maximum number of behavioral violations.";
+                cheatingDetectedModal.show();
+            }
+        } catch (error) {
+            console.error('Error recording behavioral violation:', error);
+        }
     }
 
     async function recordTabSwitch(examId, violationCount) {
@@ -470,7 +600,7 @@
                 isSubmitting = false;
             }
         } catch (error) {
-           // console.error('Error submitting exam:', error);
+            // console.error('Error submitting exam:', error);
             //alert('Error submitting exam. Please try again.');
             //isExamActive = true;
             //isSubmitting = false;

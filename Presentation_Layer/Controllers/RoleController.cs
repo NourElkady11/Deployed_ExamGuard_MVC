@@ -10,7 +10,7 @@ using System.Data;
 
 namespace Presentation_Layer.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Doctor")]
     public class RoleController : Controller
     {
         private readonly UserManager<ApplicationUser> userManager;

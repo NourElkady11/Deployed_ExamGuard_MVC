@@ -15,7 +15,7 @@ using Data.Models;
 
 namespace Presentation_Layer.Controllers
 {
-	[Authorize(Roles = "Admin")]	
+	[Authorize(Roles = "Doctor")]	
 	public class UserController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager) : Controller
 	{
 		public async Task<IActionResult> Index(string email)

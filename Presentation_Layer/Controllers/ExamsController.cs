@@ -9,7 +9,7 @@ using Presentation_Layer.ViewModels;
 
 namespace Presentation_Layer.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Doctor")]
     public class ExamsController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
